@@ -1,10 +1,11 @@
 [project]
-name = "inf265 assignments"
+name = "inf265_assignments"
 version = "0.1.0"
 description = "V2026"
 readme = "README.md"
 requires-python = ">=3.12.0"
 dependencies = [
+    "ipykernel>=7.1.0",
     "jupyter>=1.1.1",
     "matplotlib>=3.10.8",
     "pandas>=2.3.3",
