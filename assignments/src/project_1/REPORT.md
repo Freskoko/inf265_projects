@@ -169,6 +169,8 @@ Generally, the model manages to guess almost all planes as planes. It is a littl
 
 Again, a similar case for the test data, but now the model is worse on correctly predicting planes. The model generalizes, but not as well as on validation data. Perhaps the test data includes some particularly hard to spot images of birds/planes? Let's have a look.
 
+# TODO TEXT ACCURACY TALK ABOUT
+
 **Incorrectly classified images**
 
 Here are misclassified images in the test set and the model's confidence in its prediction.
