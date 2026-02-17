@@ -175,7 +175,9 @@ Here are misclassified images in the test set and the model's confidence in its 
 
 [wrong_test](imgs/wrong_images_test.png)
 
-Some images are clearly very "On the edge", like the very first image (top-left) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the 4th image, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
+Some images are clearly very "On the edge", like the very first image (index = 0) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the image with index = 3, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
+
+Closeups
 
 Why is the model making mistakes? First off, the task is hard. Birds and planes are oftentimes in the sky, so using the blue background is not an option to distinugish them.
 The specific model we chose actually had quite a high validation loss, and this can help explain the sometimes very wrong predictions.
