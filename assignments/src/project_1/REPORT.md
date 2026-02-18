@@ -20,15 +20,15 @@ We preprocessed by normalizing (based on train only).
 We did some data exploration.
 First off we checked the class distribution:
 
-[class_dis](imgs/class_dist.png)
+![class_dis](imgs/pipeline/class_dist.png)
 
 Accuracy will be good here.
 
 Looking at some of the (normalized) images:
 
 
-[plane](imgs/plane_train.png)
-[bird](imgs/bird_train.png)
+![plane](imgs/pipeline/example_plane_train.png)
+![bird](imgs/pipeline/example_bird_train.png)
 
 
 
@@ -66,7 +66,7 @@ hid layer: 128 - 32 -> relu
 out layer: 32 - 2 no activation function
 ```
 
-[baseline](imgs/hyperparams_MyMLPBaseLine.png)
+![baseline](imgs/pipeline/hyperparams_MyMLPBaseLine.png)
 
 We see a lot of different behviour in this model, depending on the hyperparameters.
 An interesting model is the one in the bottom left, this model has a high learning rate at 0.01 and a lot of momentum. What we see is that the model overfits as its training loss goes down a lot. This makes sense with its hyperparameters, as when the model starts to move in one direction, it can be hard to change its direction. Interestingly, as the model's validation loss increases, but the validation accuracy does not change much over the epochs.
@@ -94,7 +94,7 @@ out layer: 32 - 2 no activation function
 
 This deeper network has an additional layer. This can help the model learn more complex features, but may also increase overfitting (a regular risk when making a model more complex). 
 
-[deep](imgs/hyperparams_MyMLPDDeep.png)
+![deep](imgs/pipeline/hyperparams_MyMLPDeep.png)
 
 Some of the models, with the bottom left model in particiular, are overfitting. This model (,uch like the top left in the baseline) sees a steep decline in training loss (and a correspoding HIGH training accuracy), but the validation loss is gradually increasing. The validation accuracy is actually quite good, but as disucssed, these are not the same.
 The deeper model can capture more of the image features, and more of its weights can adjust to the training data, learning it better. It's weights with a high learning rate (0.01) and momentum (0.9) support this aggressive learning style.
@@ -114,8 +114,7 @@ out layer: 32 - 2 no activation function
 
 This wider network has a layer with an increased size. This can help the model learn more complex features, but may (much like the deeper network) also increase overfitting (a regular risk when making a model more complex). 
 
-[wide](imgs/hyperparams_MyMLPWide.png)
-
+![wide](imgs/pipeline/hyperparams_MyMLPWide.png)
 
 ### Model with dropout:
 
@@ -131,7 +130,7 @@ This network is the same as the basline, but has dropout between each layer (exc
 
 This can help the model , but may (much like the deeper network) also increase overfitting (a regular risk when making a model more complex). 
 
-[wide](imgs/hyperparams_MyMLPWide.png)
+![wide](imgs/pipeline/hyperparams_MyMLPWide.png)
 
 Generally speaking, both the train and validation losses are a little more "jagged", compared to the sometimes smoother loss lines we see in other models. We see the models learn, but certain neurons are not always learning, they have been turned off, so not all neurons are learning at the same pace.
 
@@ -139,7 +138,7 @@ Generally speaking, both the train and validation losses are a little more "jagg
 
 The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see it's performance:
 
-[best_model](imgs/best_model.png)
+![best_model](imgs/pipeline/best_model.png)
 
 It had a validation accuracy of **0.880**, but this is not extraordinary, as other models had very close validation accuracies, like one of the wide models which acheived a validation accuracy of **0.878**.
 
@@ -149,13 +148,13 @@ Lets see how well the model does on training data.
 
 **Train data**
 
-[conf_train](imgs/confusion_matrix_train.png)
+![conf_train](imgs/pipeline/confusion_matrix_train.png)
 
 Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well.
 
 **Validation data**
 
-[conf_val](imgs/confusion_matrix_val.png)
+![conf_val](imgs/pipeline/confusion_matrix_validation.png)
 
 The validation data tells a similar story to that of the training data, as it does well on planes, and a fair bit worse on birds, albeit a bit worse across the board.
 
@@ -165,7 +164,7 @@ Generally, the model manages to guess almost all planes as planes. It is a littl
 
 **Test data**
 
-[conf_test](imgs/confusion_matrix_test.png)
+![conf_test](imgs/pipeline/confusion_matrix_test.png)
 
 Again, a similar case for the test data, but now the model is worse on correctly predicting planes. The model generalizes, but not as well as on validation data. Perhaps the test data includes some particularly hard to spot images of birds/planes? Let's have a look.
 
@@ -175,7 +174,7 @@ Again, a similar case for the test data, but now the model is worse on correctly
 
 Here are misclassified images in the test set and the model's confidence in its prediction.
 
-[wrong_test](imgs/wrong_images_test.png)
+![wrong_test](imgs/pipeline/wrong_images_test.png)
 
 Some images are clearly very "On the edge", like the very first image (index = 0) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the image with index = 3, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
 
