@@ -39,6 +39,8 @@ The function `train_manual_update` performs the same initialization as the train
 
 ## 2.
 
+This part is not exactly the same, but thi sis ok and normal, talked to a group leader.
+
 ### Machine learning pipelines
 
 ## 3.
