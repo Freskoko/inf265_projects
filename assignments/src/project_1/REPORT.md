@@ -69,23 +69,25 @@ Looking at some of the (normalized) images:
 
 We had 4 different models, a baseline, a deep one, a wide one, and a model with dropout enabled.
 
-Hyperparams chosen: 
+Here are the hyperparams chosen to try:: 
 
 ```python
+# for all models
 learning_rate_ls = [1e-3, 1e-2]
 momentum_ls = [0.5, 0.9]
 weight_decay_ls = [1e-4, 1e-2]
 
 # only for dropout model
-dropout_rate_ls = [0.2, 0.4]  # wanted to try 0.8 to see the effect
+dropout_rate_ls = [0.2, 0.4]
 
+# max amount of epochs to try
 MAX_EPOCHS = 30
 
 # we check model performance at 5,15, and 30 epochs
 EPOCH_INVESTIGATE_POINTS = [5, 15, 30]
 ```
 
-We chose these in order to have a wide amount of hyperparameters, without having too many, causing training to take a long time.
+We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting.
 
 Lets see how the different models performed.
 
@@ -197,11 +199,11 @@ Generally, the model manages to guess almost all planes as planes. It is a littl
 
 **Test data**
 
+Finally, we tested the best model on test data. It got a test accuracy of 0.854
+
 ![conf_test](imgs/pipeline/confusion_matrix_test.png)
 
 Again, a similar case for the test data, but now the model is worse on correctly predicting planes. The model generalizes, but not as well as on validation data. Perhaps the test data includes some particularly hard to spot images of birds/planes? Let's have a look.
-
-# TODO TEXT ACCURACY TALK ABOUT
 
 **Incorrectly classified images**
 
@@ -211,10 +213,10 @@ Here are misclassified images in the test set and the model's confidence in its 
 
 Some images are clearly very "On the edge", like the very first image (index = 0) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the image with index = 3, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
 
-Closeups
+Closeups seem to really confuse the model, as it tends to be very incorrect, being 100% sure closeups of bird and planes, and vice-versa.
 
 Why is the model making mistakes? First off, the task is hard. Birds and planes are oftentimes in the sky, so using the blue background is not an option to distinugish them.
-The specific model we chose actually had quite a high validation loss, and this can help explain the sometimes very wrong predictions.
+The specific model we chose actually had quite a high validation loss, and this can help explain the sometimes wildly incorrect predictions.
 
 ### Did something go against expectations?
 
@@ -222,4 +224,4 @@ I had high hopes for the dropout model as from previous experience, these can be
 
 ## Conclusion:
 
-Generally, the models 
+Generally, the models perform well, but vary depending on the parameters chosen.
