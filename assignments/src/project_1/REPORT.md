@@ -1,10 +1,41 @@
 # INF265: Project 1
 
-## 1.
+## 1. Approach & Design choices
 
 ### Backpropogation
 
+The goal of the backpropagation function is to implement backpropagation manually, without PyTorch autograd, in order to calculate ∇L(θ), the gradient of the loss with respect to the network's parameters.
+
+The implementation starts by calculating the derivative of the squared error loss of the output, meaning how much the network's prediction differs from the actual values. This is implemented by:
+`dL_da = -2 * (y_true - y_pred)`
+This derivative is then multiplied by the derivative of the activation function, evaluated at the pre-activation layer of the output layer. This is implemented by:
+`dL_dz = dL_da * model.df[model.L](model.z[model.L])`
+where dL_dz corresponds to δ<sup>[L]</sup>
+
+Gradients are stored in `dL_dw` and `dL_db`, implemented by:
+```python
+model.dL_db[model.L] = dL_dz.squeeze(0)
+model.dL_dw[model.L] = dL_dz.T @ model.a[model.L - 1]
+```
+Squeeze is used to vectorize the matrix.
+
+After initialization, layers are looped through backwards. For each layer, the error signal is propogated back through the weights to determine how much each neuron contributed to the mistake. Values are adjusted using the derivative of the activation function, `model.df[layer](model.z[layer])`, producing the neuron gradients. This results in the bias gradient, `model.dL_db[layer]`, and combined with the previous layer's activations the weight gradient, `model.dL_dw[layer]`.
+
+
+
 ### Gradient descent
+
+The implementation of gradient descent is divided into two functions: train, which uses a SGD optimizer, and train_manual_update, where calculations for gradient descent is manually implemented.
+
+The class `CIFAR2` converts the CIFAR-10 dataset into a subset containing only birds and planes. This is the binary classification dataset used for functions later. Images of birds are labeled as 1, and planes are labeled as 0.
+
+The function `load_cifar` splits the CIFAR into training, validation and test data. A random split of 90% training data, 5% validation data and 5% test data is chosen for this task. Each subset is wrapped in a DataLoader with a batch size of 32, and shuffling disabled to ensure reproducibility. 
+
+The class `MyNet` is implemented with an input layer with dimensions (32x32x3, 512), two hidden layers with dimensions (512, 128) and (128, 32), and an output layer with dimensions (32, 2). ReLU is used as activation functions. There is no softmax because cross-entropy already uses softmax.
+
+The function `train` uses a PyTorch optimizer in order to train the model. Amount of batches are initialized using the length of the train_loader, losses are stored in a list and gradients are cleared. After initialization, the model computes loss, computes gradients through backpropogation, and updates parameters using the optimizer. 
+
+The function `train_manual_update` performs the same initialization as the train function, but the calculations are implemented manually rather than using an optimizer. The manual calculation is done by looping through every parameter's weight and velocity. Each parameter's gradient is then modified using L2 regularization, implemented by `grad = p.grad + weight_decay * p.data`. Then the velocity is updated, using the momentum. This is implemented by `v.mul_(momentum).add_(grad)`. Lastly, the parameter is updated using the learning rate and the newly calculated velocity, implemented by `p.data -= lr * v`.
 
 ## 2.
 
