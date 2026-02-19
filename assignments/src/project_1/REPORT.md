@@ -105,25 +105,18 @@ out layer: 32 - 2 no activation function
 
 We see a lot of different behviour in this model, depending on the hyperparameters.
 An interesting model is the one in the bottom left, this model has a high learning rate at 0.01 and a lot of momentum. What we see is that the model overfits as its training loss goes down a lot. This makes sense with its hyperparameters, as when the model starts to move in one direction, it can be hard to change its direction. Interestingly, as the model's validation loss increases, but the validation accuracy does not change much over the epochs.
-This is a good example of how a loss function and performance metric are not the same thing!
+This is a good example of how a loss function and performance metric are not the same thing! The loss increasing means that the model is less and less sure of the correct target, but it is atleast over 50% since the validation accuracy is decent.
 
-The loss increasing means that the model is less and less sure of the correct target, but it is atleast over 50% since the validation accuracy is decent.
-
-THe model in the middle bottom, (8th image) seems to have issues learning. --
-<!-- todo add one mroe -->
-
-
-Generally, these models all learn, but some learn slower
-
+Generally, these models all learn, but some learn slower, and some overfit.
 
 ### Deeper model:
 
 *Architecture*:
 ```
-inp layer: 3072 - 512 relu
-hid layer: 512 - 128 relu
-hid layer: 128 - 64 relu
-hid layer: 64 - 32 relu
+inp layer: 3072 - 512 -> relu
+hid layer: 512 - 128 -> relu
+hid layer: 128 - 64 -> relu
+hid layer: 64 - 32 -> relu
 out layer: 32 - 2 no activation function
 ```
 
@@ -134,8 +127,7 @@ This deeper network has an additional layer. This can help the model learn more 
 Some of the models, with the bottom left model in particiular, are overfitting. This model (,uch like the top left in the baseline) sees a steep decline in training loss (and a correspoding HIGH training accuracy), but the validation loss is gradually increasing. The validation accuracy is actually quite good, but as disucssed, these are not the same.
 The deeper model can capture more of the image features, and more of its weights can adjust to the training data, learning it better. It's weights with a high learning rate (0.01) and momentum (0.9) support this aggressive learning style.
 
-<!-- todo -->
-Compare top left and top middle, similiar but weight decay.
+Two interesting runs here ar the top left and top middle runs. They have the same parameters except for weight decay. The model with a higher weight decay (middle top) has a validation loss that increases less steeply than the model with a lower weight decay. This is because the model with a higher weight decay is punished for having weights (not biases) with high values. So when the model is overfitting to the training data, the high weight decay of the middle model forces it to not have weights which get very large. The top left model is much less restricted by weight decay, so it may overfit using unreasonably large weights, causing validation loss to increase. 
 
 ### Wider model:
 
@@ -151,13 +143,15 @@ This wider network has a layer with an increased size. This can help the model l
 
 ![wide](imgs/pipeline/hyperparams_MyMLPWide.png)
 
+Generally, the wider model performs much like the baseline, but seems to learn slightly faster, but also overfit worse.
+
 ### Model with dropout:
 
 *Architecture*:
 ```
-inp layer: 3072 - 512 relu (dropout)
-hid layer: 512 - 128 relu (dropout)
-hid layer: 128 - 32 relu (dropout)
+inp layer: 3072 - 512 -> relu (dropout)
+hid layer: 512 - 128 -> relu (dropout)
+hid layer: 128 - 32 -> relu (dropout)
 out layer: 32 - 2 no activation function (no dropout)
 ```
 
@@ -177,15 +171,15 @@ The best model is selected by valiadation accuracy. The model with the best vali
 
 It had a validation accuracy of **0.880**, but this is not extraordinary, as other models had very close validation accuracies, like one of the wide models which acheived a validation accuracy of **0.878**.
 
-What is interesting is this model seems to overfit, as its valiadation loss is quite high, but as disucssed earlier, loss function =/= performance metric.
+What is interesting is this model seems to overfit, as its valiadation loss is quite high, but as disucssed earlier, loss function =/= performance metric. The validation loss is high and the model may be unsure, but the validation accuracy says this is the best model. Perhaps we should choose some other model, use early stopping or the likes, but for this project, we select based on validation accuracy.
 
-Lets see how well the model does on training data.
+Lets see some confusion matricies on the model performance:
 
 **Train data**
 
 ![conf_train](imgs/pipeline/confusion_matrix_train.png)
 
-Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well.
+Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well. The model may be able to get away with being slightly worse at one class since we are using accuracy and not F1 score.
 
 **Validation data**
 
@@ -199,7 +193,7 @@ Generally, the model manages to guess almost all planes as planes. It is a littl
 
 **Test data**
 
-Finally, we tested the best model on test data. It got a test accuracy of 0.854
+Finally, we tested the best model on test data. It got a test accuracy of **0.854**, which is pretty good. The model seems to have generalized well.
 
 ![conf_test](imgs/pipeline/confusion_matrix_test.png)
 
