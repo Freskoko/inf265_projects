@@ -38,58 +38,58 @@ The function `train` uses a PyTorch optimizer in order to train the model. Amoun
 The function `train_manual_update` performs the same initialization as the train function, but the calculations are implemented manually rather than using an optimizer. The manual calculation is done by looping through every parameter's weight and velocity. Each parameter's gradient is then modified using L2 regularization, implemented by `grad = p.grad + weight_decay * p.data`. Then the velocity is updated, using the momentum. This is implemented by `v.mul_(momentum).add_(grad)`. Lastly, the parameter is updated using the learning rate and the newly calculated velocity, implemented by `p.data -= lr * v`.
 
 ## 2.
+    Our train loss is very similar, but seems to differ past 17 epochs. After having talked to a kind group leader, we attempted to understand why this was happening, and fix it. She helped us, but we could not understand why the two solutions were diverging after a while. Please be gracious when grading, we tried our best :^)
 
-This part is not exactly the same, but thi sis ok and normal, talked to a group leader.
+![3.1.5](imgs/gd/3_1_5.png)
+
+![3.1.6](imgs/gd/3_1_6.png)
+
+![3.1.7](imgs/gd/3_1_7.png)
 
 ### Machine learning pipelines
 
 ## 3.
 
 We split the data up, 0.90% train, and validation / test being 0.05
-We did this because neural networks are data hungry. Validation and test may have a low amount of data, but we still beleive they can help us find a good model.
+We split this away because neural networks are quite data hungry. The validation and test sets may have a low amount of data, but we still believe they can help us find a good model.
 
-We preprocessed by normalizing (based on train only).
+We preprocessed by normalizing (based on train only), and transformed the validation/test data based on the training data normalization values.
 
-We did some data exploration.
-First off we checked the class distribution:
-
-![class_dis](imgs/pipeline/class_dist.png)
-
-Accuracy will be good here.
-
-Looking at some of the (normalized) images:
-
+Then, we did some data exploration.
+Looking at some of the (normalized) images from the training data:
 
 ![plane](imgs/pipeline/example_plane_train.png)
 ![bird](imgs/pipeline/example_bird_train.png)
 
+These two example images look different enough, I think a model could be able to differentiate the two.
 
+Lets check the class distribution:
+
+![class_dis](imgs/pipeline/class_dist.png)
+
+Accuracy will be good here. One could consider a performance measure like F1 score if the data in unbalanced, but this looks good, accuracy will work.
 
 ### Results
 
 We had 4 different models, a baseline, a deep one, a wide one, and a model with dropout enabled.
 
-Here are the hyperparams chosen to try:: 
+Here are the hyperparameters chosen to try:
 
-```python
-# for all models
-learning_rate_ls = [1e-3, 1e-2]
-momentum_ls = [0.5, 0.9]
-weight_decay_ls = [1e-4, 1e-2]
-
-# only for dropout model
-dropout_rate_ls = [0.2, 0.4]
-
-# max amount of epochs to try
-MAX_EPOCHS = 30
-
-# we check model performance at 5,15, and 30 epochs
-EPOCH_INVESTIGATE_POINTS = [5, 15, 30]
-```
+| Parameter      | Values       | Notes                                       |
+| -------------- | ------------ | ------------------------------------------- |
+| Learning Rate  | 0.001, 0.01  |                       |
+| Momentum       | 0.5, 0.9     |                       |
+| Weight Decay   | 0.0001, 0.01 |                       |
+| Dropout Rate   | 0.2, 0.4     | Only for dropout model                      |
+| Epochs Checked | 5, 15, 30    | Model performance evaluated at these points |
 
 We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting.
 
-Lets see how the different models performed.
+We chose to run our models for **30** epochs maximum, to reduce training time.
+As stated above, we evaluate model performance while training, at 5, 15 and 30 epochs.
+
+
+Below are the model architectures as well as how the models performed.
 
 ### Baseline:
 
@@ -224,4 +224,9 @@ I had high hopes for the dropout model as from previous experience, these can be
 
 ## Conclusion:
 
-Generally, the models perform well, but vary depending on the parameters chosen.
+Generally, the models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn. Overall, many of the images were correctly identified, and the model generalized.
+
+## On the use of AI
+
+AI was used in this project, to assist in bug-fixing, plot creation, and understanding of the learning material.
+AI has been cited in the code where appropriate.
