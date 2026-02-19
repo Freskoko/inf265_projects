@@ -2,7 +2,7 @@
 
 ## 1. Approach & Design choices
 
-### Backpropogation
+### Backpropagation
 
 The goal of the backpropagation function is to implement backpropagation manually, without PyTorch autograd, in order to calculate ∇L(θ), the gradient of the loss with respect to the network's parameters.
 
@@ -17,7 +17,7 @@ Gradients are stored in `dL_dw` and `dL_db`, implemented by:
 model.dL_db[model.L] = dL_dz.squeeze(0)
 model.dL_dw[model.L] = dL_dz.T @ model.a[model.L - 1]
 ```
-Squeeze is used to vectorize the matrix.
+We remove the batch dimension (since batch size = 1) to match the bias shape.
 
 After initialization, layers are looped through backwards. For each layer, the error signal is propogated back through the weights to determine how much each neuron contributed to the mistake. Values are adjusted using the derivative of the activation function, `model.df[layer](model.z[layer])`, producing the neuron gradients. This results in the bias gradient, `model.dL_db[layer]`, and combined with the previous layer's activations the weight gradient, `model.dL_dw[layer]`.
 
@@ -37,8 +37,9 @@ The function `train` uses a PyTorch optimizer in order to train the model. Amoun
 
 The function `train_manual_update` performs the same initialization as the train function, but the calculations are implemented manually rather than using an optimizer. The manual calculation is done by looping through every parameter's weight and velocity. Each parameter's gradient is then modified using L2 regularization, implemented by `grad = p.grad + weight_decay * p.data`. Then the velocity is updated, using the momentum. This is implemented by `v.mul_(momentum).add_(grad)`. Lastly, the parameter is updated using the learning rate and the newly calculated velocity, implemented by `p.data -= lr * v`.
 
-## 2.
-    Our train loss is very similar, but seems to differ past 17 epochs. After having talked to a kind group leader, we attempted to understand why this was happening, and fix it. She helped us, but we could not understand why the two solutions were diverging after a while. Please be gracious when grading, we tried our best :^)
+Here are some plots of the gradient descents:
+
+*Our train loss is very similar, but seems to differ past 17 epochs. After having talked to a kind group leader, we attempted to understand why this was happening, and fix it. She helped us, but we could not understand why the two solutions were diverging after a while. Please be gracious when grading, we tried our best :^)*
 
 ![3.1.5](imgs/gd/3_1_5.png)
 
@@ -50,8 +51,7 @@ The function `train_manual_update` performs the same initialization as the train
 
 ## 3.
 
-We split the data up, 0.90% train, and validation / test being 0.05
-We split this away because neural networks are quite data hungry. The validation and test sets may have a low amount of data, but we still believe they can help us find a good model.
+We split the data up, 90% of the data in allocated to training, and validation / test both having 5% of the data. We split this away because neural networks are quite data hungry. The validation and test sets may have a low amount of data, but we still believe they can help us find a good model.
 
 We preprocessed by normalizing (based on train only), and transformed the validation/test data based on the training data normalization values.
 
@@ -83,7 +83,7 @@ Here are the hyperparameters chosen to try:
 | Dropout Rate   | 0.2, 0.4     | Only for dropout model                      |
 | Epochs Checked | 5, 15, 30    | Model performance evaluated at these points |
 
-We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting.
+We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting. *We also talked to a group leader, she said these were good.*
 
 We chose to run our models for **30** epochs maximum, to reduce training time.
 As stated above, we evaluate model performance while training, at 5, 15 and 30 epochs.
@@ -155,9 +155,7 @@ hid layer: 128 - 32 -> relu (dropout)
 out layer: 32 - 2 no activation function (no dropout)
 ```
 
-This network is the same as the basline, but has dropout between each layer (except first -> second last -> output). Dropout is a form of regularization. What can happen in a network without dropout, is that two or more neurons can become very codependent. A neuron may focus a lot on a specific learned feature from the previous layer. However dropout makes it so neurons cannot always rely on one specific neighbour, more the general inputs. This (hopefully) causes neurons to generalize better from all input. One can imagine dropout as running many many different variations of the same network.
-
-This can help the model , but may (much like the deeper network) also increase overfitting (a regular risk when making a model more complex). 
+This network is the same as the basline, but has dropout between each layer (except first -> second last -> output). Dropout is a form of regularization. What can happen in a network without dropout, is that two or more neurons can become very codependent. A neuron may focus a lot on a specific learned feature from the previous layer. However dropout makes it so neurons cannot always rely on one specific neighbour, more the general inputs. This (hopefully) causes neurons to generalize better from all input. One can imagine dropout as running many many different variations of the same network. 
 
 ![wide](imgs/pipeline/hyperparams_MyMLPWide.png)
 
