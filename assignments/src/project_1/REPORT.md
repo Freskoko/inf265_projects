@@ -39,13 +39,13 @@ The function `train_manual_update` performs the same initialization as the train
 
 Here are some plots of the gradient descents:
 
-*Our train loss is very similar, but seems to differ past 17 epochs. After having talked to a kind group leader, we attempted to understand why this was happening, and fix it. She helped us, but we could not understand why the two solutions were diverging after a while. Please be gracious when grading, we tried our best :^)*
-
 ![3.1.5](imgs/gd/3_1_5.png)
 
 ![3.1.6](imgs/gd/3_1_6.png)
 
 ![3.1.7](imgs/gd/3_1_7.png)
+
+They all match! Looks good.
 
 ### Machine learning pipelines
 
@@ -163,7 +163,7 @@ Generally speaking, both the train and validation losses are a little more "jagg
 
 ### Best model. 
 
-The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see it's performance:
+The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see its performance:
 
 ![best_model](imgs/pipeline/best_model.png)
 
@@ -222,3 +222,9 @@ Generally, the models perform well, but vary depending on the parameters chosen.
 
 AI was used in this project, to assist in bug-fixing, plot creation, and understanding of the learning material.
 AI has been cited in the code where appropriate.
+In [the format uib wishes](https://www.uib.no/en/nt/180737/examples-how-you-can-describe-use-ai-%E2%80%93-faculty-science-and-technology): The service ChatGPT has been used to generate code for plotting and debugging. ChatGPT was also used to inquire into the differences between loss function and performance measure in terms of this assignment.
+
+## Divison of labour
+
+Henrik Brøgger did parts 1 (backpropagation) and 3 (machine learning pipeline). While Tobias Skodven did part 2 (gradient descent). 
+Report work was shared.
