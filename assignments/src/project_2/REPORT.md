@@ -1,0 +1,118 @@
+# INF265: Project 2: CNN
+
+## 1. Approach & Design choices
+
+### Data exploration:
+
+The data was pre-normalized, so no normalization step was required.
+
+Then, we did some data exploration.
+Looking at some of the images from the training data:
+
+![class imgs](imgs/object_detection/data_explore_train.png)
+
+The images look different enough, a model could for sure learn the different labels. Each of the bouding boxes also seem appropriate.
+
+Lets check the class distribution:
+
+![class_dis](imgs/object_detection/class_dist.png)
+
+Hmm, seems like there is some class imbalance. One of the classes has twice the counts as all other classes. However, this should not cause any major issues. I dont think the model can get away with being very good at class 1 and ignoring the rest of the images.
+
+![pixel_dist](imgs/object_detection/pixel_dist.png)
+The pixel distribution is nice and normal, but there are (understandably), peaks at 0 and 1. Seems like very white and very black pixels are common in these images. Nothing weird here.
+
+## 2. Model hyperparamters:
+
+### Results
+# todo
+
+We had 4 different models, a baseline, a deep one, a wide one, and a model with dropout enabled.
+
+Here are the hyperparameters chosen to try:
+
+| Parameter      | Values       | Notes                                       |
+| -------------- | ------------ | ------------------------------------------- |
+| Learning Rate  | 0.001, 0.01  |                       |
+| Momentum       | 0.5, 0.9     |                       |
+| Weight Decay   | 0.0001, 0.01 |                       |
+| Dropout Rate   | 0.2, 0.4     | Only for dropout model                      |
+| Epochs Checked | 5, 15, 30    | Model performance evaluated at these points |
+
+We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting. *We also talked to a group leader, she said these were good.*
+
+We chose to run our models for **30** epochs maximum, to reduce training time.
+As stated above, we evaluate model performance while training, at 5, 15 and 30 epochs.
+
+
+Below are the model architectures as well as how the models performed.
+
+### Baseline:
+
+### Best model. 
+
+The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see its performance:
+
+![best_model](imgs/pipeline/best_model.png)
+
+It had a validation accuracy of **0.880**, but this is not extraordinary, as other models had very close validation accuracies, like one of the wide models which acheived a validation accuracy of **0.878**.
+
+What is interesting is this model seems to overfit, as its valiadation loss is quite high, but as disucssed earlier, loss function =/= performance metric. The validation loss is high and the model may be unsure, but the validation accuracy says this is the best model. Perhaps we should choose some other model, use early stopping or the likes, but for this project, we select based on validation accuracy.
+
+Lets see some confusion matricies on the model performance:
+
+**Train data**
+
+![conf_train](imgs/pipeline/confusion_matrix_train.png)
+
+Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well. The model may be able to get away with being slightly worse at one class since we are using accuracy and not F1 score.
+
+**Validation data**
+
+![conf_val](imgs/pipeline/confusion_matrix_validation.png)
+
+The validation data tells a similar story to that of the training data, as it does well on planes, and a fair bit worse on birds, albeit a bit worse across the board.
+
+With a performance metric like accuracy, a model may sometimes get away with guessing slightly more of one class than the other. 
+
+Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well.
+
+**Test data**
+
+Finally, we tested the best model on test data. It got a test accuracy of **0.854**, which is pretty good. The model seems to have generalized well.
+
+![conf_test](imgs/pipeline/confusion_matrix_test.png)
+
+Again, a similar case for the test data, but now the model is worse on correctly predicting planes. The model generalizes, but not as well as on validation data. Perhaps the test data includes some particularly hard to spot images of birds/planes? Let's have a look.
+
+**Incorrectly classified images**
+
+Here are misclassified images in the test set and the model's confidence in its prediction.
+
+![wrong_test](imgs/pipeline/wrong_images_test.png)
+
+Some images are clearly very "On the edge", like the very first image (index = 0) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the image with index = 3, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
+
+Closeups seem to really confuse the model, as it tends to be very incorrect, being 100% sure closeups of bird and planes, and vice-versa.
+
+Why is the model making mistakes? First off, the task is hard. Birds and planes are oftentimes in the sky, so using the blue background is not an option to distinugish them.
+The specific model we chose actually had quite a high validation loss, and this can help explain the sometimes wildly incorrect predictions.
+
+### Did something go against expectations?
+
+I had high hopes for the dropout model as from previous experience, these can be very effective. Perhaps given more data, time, layers or "wideness", these could perform well.
+
+## Conclusion:
+
+Generally, the models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn. Overall, many of the images were correctly identified, and the model generalized.
+
+## On the use of AI
+
+AI was used in this project, to assist in bug-fixing, plot creation, and understanding of the learning material.
+AI has been cited in the code where appropriate.
+In [the format uib wishes](https://www.uib.no/en/nt/180737/examples-how-you-can-describe-use-ai-%E2%80%93-faculty-science-and-technology): The service ChatGPT has been used to generate code for plotting and debugging. ChatGPT was also used to inquire into the differences between loss function and performance measure in terms of this assignment.
+
+## Divison of labour
+
+Henrik Brøgger did parts 1 (backpropagation) and 3 (machine learning pipeline). While Tobias Skodven did part 2 (gradient descent). 
+Report work was shared.
