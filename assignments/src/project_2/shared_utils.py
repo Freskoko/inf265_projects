@@ -100,3 +100,7 @@ def scale_vars(x,y,w,h):
     return scaled_x, scaled_y, scaled_w, scaled_h
 
 
+def preprocess_out_noise(dataset, threshold=1.5):
+    img = dataset[0].clone()
+    img[img < threshold] = 0
+    return (img, dataset[1])

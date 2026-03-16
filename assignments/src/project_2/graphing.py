@@ -48,4 +48,20 @@ def average_pixel_value(all_pixels, save_dir):
     plt.tight_layout()
     plt.savefig(save_dir / "pixel_dist.png")
     plt.show()
-    
+
+
+def pixels_outside_inside_hist(inside, outside, save_dir, label=""):
+    plt.figure(figsize=(8,5))
+    plt.hist(outside.numpy(), bins=50, alpha=0.6, color='blue', label='outside bbox', density=True)
+    plt.hist(inside.numpy(), bins=50, alpha=0.6, color='green', label='inside bbox', density=True)
+    plt.xlabel("Pixel value")
+    plt.ylabel("Frequency")
+    plt.title(f"Pixel value distribution for pixels inside/outside of bb (train set) {label}")
+    plt.legend(handles=[
+        Patch(color='blue', alpha=0.6, label='outside bbox'),
+        Patch(color='green', alpha=0.6, label='inside bbox'),
+        Patch(color='teal', alpha=0.6, label='overlap'),  # blue+green overlap = teal
+    ])
+    plt.tight_layout()
+    plt.savefig(save_dir / f"inside_outside_pixel_dist_{label}.png")
+    plt.show()
