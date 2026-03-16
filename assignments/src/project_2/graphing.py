@@ -67,17 +67,17 @@ def pixels_outside_inside_hist(inside, outside, save_dir, label=""):
     plt.show()
 
 
-def score_across_datasets(final_scores, save_dir):
+def score_across_datasets(final_scores, save_dir, metric = "accuracy"):
     plt.bar(
         list(final_scores.keys()), list(final_scores.values()), label=final_scores.keys()
     )
     plt.xlabel("Dataset")
-    plt.ylabel("Accuracy")
-    plt.title("Accuracy across datasets")
+    plt.ylabel(metric)
+    plt.title(f"{metric} across datasets")
     for x, y in final_scores.items():
         plt.text(x, y, f"{y:.2}", ha="center")
 
-    plt.savefig(save_dir / "final_acc_scores.png")
+    plt.savefig(save_dir / f"final_{metric}_scores.png")
     plt.show()
 
 
