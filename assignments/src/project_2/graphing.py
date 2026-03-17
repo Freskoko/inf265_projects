@@ -21,8 +21,8 @@ import matplotlib.gridspec as gridspec
 
 def plot_class_counter(all_targets, save_dir):
 
-    max_target = max(all_targets)
-    min_target = min(all_targets)
+    max_target = int(max(all_targets))
+    min_target = int(min(all_targets))
 
     counts = Counter(all_targets)
     plt.bar(
