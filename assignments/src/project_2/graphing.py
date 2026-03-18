@@ -38,6 +38,26 @@ def plot_class_counter(all_targets, save_dir):
     plt.savefig(save_dir / "class_dist.png")
     plt.show()
 
+def plot_item_vs_no_item(all_targets, save_dir):
+    no_item = len([i for i in all_targets if i == -1])
+    yes_item = len([i for i in all_targets if i != -1])
+
+    counter = {
+        "has_object":yes_item,
+        "no_object": no_item
+    }
+
+    plt.bar(
+        list(counter.keys()), list(counter.values()), label=counter.keys()
+    )
+    plt.xlabel("Class")
+    plt.ylabel("Amount per class")
+    plt.title("Item distribution in train set")
+    for x, y in counter.items():
+        plt.text(x, y, f"{y}", ha="center")
+
+    plt.savefig(save_dir / "class_dist_items.png")
+    plt.show()
 
 def average_pixel_value(all_pixels, save_dir):
     plt.figure(figsize=(8,5))
