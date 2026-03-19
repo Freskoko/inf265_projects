@@ -1,3 +1,7 @@
-# maybe f1 for classes?
+# nonmax in train?, or nonmax only after?
 
-do we pick off best boudning box, maybe combination?
+# do models look ok?
+
+# what to vary for problem 2?
+
+# score ok?
