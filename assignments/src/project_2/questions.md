@@ -1,7 +1,9 @@
-# nonmax in train?, or nonmax only after?
+# nonmax localization in train?, or nonmax only after?
 
 # do models look ok?
 
+# params to vary
+
 # what to vary for problem 2?
 
-# score ok?
+# map score help em understand
