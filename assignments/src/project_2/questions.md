@@ -7,3 +7,6 @@
 # what to vary for problem 2?
 
 # map score help em understand
+
+
+# TODO: TOTENSOR
