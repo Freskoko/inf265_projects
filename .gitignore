@@ -1,4 +1,7 @@
 **/data
-**/models
+# **/models
 .venv
 **/**__pycache__
+
+assignments/src/project_1/models
+.env
