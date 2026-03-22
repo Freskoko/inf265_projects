@@ -4,7 +4,7 @@
 
 ### Data exploration:
 
-The data was pre-normalized, so no normalization step was required.
+We normalized the data
 
 Then, we did some data exploration.
 Looking at some of the images from the training data:
@@ -116,3 +116,23 @@ In [the format uib wishes](https://www.uib.no/en/nt/180737/examples-how-you-can-
 
 Henrik Brøgger did parts 1 (backpropagation) and 3 (machine learning pipeline). While Tobias Skodven did part 2 (gradient descent). 
 Report work was shared.
+
+
+#
+# notes:
+# num of layers affects size of receptive field
+# kernel size affects ability to see complicated things
+# we need to use MAP
+
+# we could compute bounding boxes and accuracy
+
+# since we can really have inifnite true negatives, we have to use precision
+
+# precsion : TP / TP + FP <- we can abuse by placing few boxes
+# recall : TP / TP + FN <- we can abuse by placing many many boxes
+
+# MAP:
+# mean precision is mean precision for one class
+
+# if iou is more than half then we got a TP
+# but if multiple, pick the one with highest IOU, rest are FN
