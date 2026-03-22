@@ -95,7 +95,7 @@ def score_across_datasets(final_scores, save_dir, metric = "accuracy"):
     plt.ylabel(metric)
     plt.title(f"{metric} across datasets")
     for x, y in final_scores.items():
-        plt.text(x, y, f"{y:.2}", ha="center")
+        plt.text(x, y, f"{y:.4}", ha="center")
 
     plt.savefig(save_dir / f"final_{metric}_scores.png")
     plt.show()
