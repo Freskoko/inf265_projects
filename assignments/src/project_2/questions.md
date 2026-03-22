@@ -9,4 +9,4 @@
 # map score help em understand
 
 
-# TODO: TOTENSOR
+# TODO: to tensor?, they are tensors??
