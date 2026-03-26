@@ -1,10 +1,55 @@
 # INF265: Project 2: CNN
 
+## 1. Object localization:
+
+### Data exploration, preprocessing
+
+We initially normalized the data, then plotted some of the images with their items and bounding boxes:
+
+![imgs](imgs/object_localization/data_explore_train.png)
+
+We then had a look at the class distribution.
+
+![imgs](imgs/object_localization/class_dist.png)
+
+Seems like classes are mostly balanced, looks good.
+
+We then plotted how many images have an item vs no item.
+
+![imgs](imgs/object_localization/class_dist_item.png)
+
+Seems like the distribution is unequal, the model could get away with guessing that there is an item in the image when there actually is none, so we should keep track of how good the model is at guessing if there is an item in the image or not.
+
+
+Next we had a look at the pixel value distribution
+
+![imgs](imgs/object_localization/pixel_dist.png)
+
+Looks alright, normalization worked.
+
+Next up, we had a look at the pixel values outside/inside the bounding boxes.
+
+![imgs](imgs/object_localization/inside_outside_pixel_dist_pre_process.png)
+
+Seems like the pixels we are interested in tend towards higher values.
+We tried to de-noise the data by setting all pixels under a value of 1.5 to 0.
+
+![imgs](imgs/object_localization/inside_outside_pixel_dist_post_process.png)
+
+Now there is a clear divide!
+
+![imgs](imgs/object_localization/data_explore_train_post_process.png)
+
+And the images still look ok. Nice, hopefully this helps the model.
+
+### Model definitions
+
+
 ## 1. Approach & Design choices
 
 ### Data exploration:
 
-We normalized the data
+We initially normalized the data.
 
 Then, we did some data exploration.
 Looking at some of the images from the training data:
@@ -22,24 +67,19 @@ Hmm, seems like there is some class imbalance. One of the classes has twice the 
 ![pixel_dist](imgs/object_detection/pixel_dist.png)
 The pixel distribution is nice and normal, but there are (understandably), peaks at 0 and 1. Seems like very white and very black pixels are common in these images. Nothing weird here.
 
-## 2. Model hyperparamters:
-
-
 ## 2. Models and hyperparameters
 
-### Object localization
-
-For object localization, the following models have been used:
+For object localization, we tried a wide range of models to see how they performed.
 
 | Model                | Description                    |
 |----------------------|--------------------------------|
 | CNNBaselineNoBatch   | Basic CNN without BatchNorm    |
 | CNNBaselineWithBatch | CNN with BatchNorm             |
-| CNNDeep              | Deeper CNN                     |
-| CNNResNet            | CNN with residual connections  |
-| CNNDenseNet          | CNN with dense connections     |
+| CNNDeep              | Deeper CNN + Batchnorm                     |
+| CNNResNet            | CNN with residual connections + Batchnorm  |
+| CNNDenseNet          | CNN with dense connections + Batchnorm     |
 
-We used a combination of simple and more complex models to see how it affects performance. Since there is only one object per image, the models use fully connected layers for the final prediction.
+Since there is only one object per image, the models use fully connected layers for the final prediction.
 
 The following hyperparameters have been used:
 
@@ -47,11 +87,71 @@ The following hyperparameters have been used:
 |----------------|--------------|
 | Batch size     | 32           |
 | N epochs       | 15           |
-| Learning rate  | 1e-3, 1e-4   |
-| Weight decay   | 0, 1e-4      |
-| Dropout        | 0, 0.3       |
+| Learning rate  | *1e-3, 1e-4*   |
+| Weight decay   | *0, 1e-4*      |
+| Dropout        | *0, 0.3*       |
 
 A grid search over learning rate, weight decay and dropout was used during training of each model. Batch size and number of epochs were kept constant across all trainings.
+
+Here all plots over all model performances:
+
+![nobatch](imgs/object_detection/hyperparams_CNNBaselineNoBatch.png)
+
+Generally, the baseline with no batch performs ok... etc
+
+![nobatch](imgs/object_detection/hyperparams_CNNBaselineWithBatch.png)
+
+Generally, the baseline with no batch performs ok... etc
+
+![nobatch](imgs/object_detection/hyperparams_CNNDeep.png)
+
+Generally, the baseline with no batch performs ok... etc
+
+![nobatch](imgs/object_detection/hyperparams_CNNDenseNet.png)
+
+Generally, the baseline with no batch performs ok... etc
+
+![nobatch](imgs/object_detection/hyperparams_CNNResNet.png)
+
+Generally, the baseline with no batch performs ok... etc
+
+
+### Best model:
+
+the best model was CNNResNet with these hyperparameters:
+
+| Hyperparameter | Values |
+|----------------|--------|
+| Learning rate  | 1e-4   |
+| Weight decay   | 1e-4   |
+| Dropout        | 0.3    |
+
+Here is its performance:
+
+![best](imgs/object_detection/best_model.png)
+
+This model does quite well, maybe some overfitting towards the end. It has quite a high iou and class accuracy! Object accuracy is always high.
+
+
+### 3. Performance
+
+
+
+## 5. Results
+
+### Results
+# todo
+
+### Object localization
+
+The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
+
+The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
+
+
+# -----------------------------
+
+# Object detection
 
 ### Object detection
 
@@ -78,30 +178,6 @@ The following hyperparameters have been used:
 
 The same grid search over learning rate and weight decay was used during training, and batch size and number of epochs are constant across trainings.
 
-## 3. Performance
-
-### Object localization
-
-For object localization, the best model was CNNResNet with these hyperparameters:
-
-| Hyperparameter | Values |
-|----------------|--------|
-| Learning rate  | 1e-4   |
-| Weight decay   | 1e-4   |
-| Dropout        | 0.3    |
-
-The performance of this model on validation data was:
-
-| Metric                   | Value  |
-|--------------------------|--------|
-| Accuracy                 | 0.9483 |
-| IoU                      | 0.6200 |
-| Mean of accuracy and IoU | 0.7842 |
-
-The graph below shows the accuracy of this model through the epochs.
-
-(SETT INN BILDE)
-
 ### Object detection
 
 For object detection, the best model was CNNResNet with these hyperparameters:
@@ -124,25 +200,6 @@ The graph below shows the map score of this model through the epochs.
 
 (SETT INN BILDE)
 
-## 4. Plots
-
-
-
-## 5. Results
-
-### Results
-# todo
-
-### Object localization
-
-The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
-
-The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
-
-
-
-
-### Object detection
 
 ### Results
 # todo
