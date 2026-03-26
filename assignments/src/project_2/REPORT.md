@@ -4,8 +4,6 @@
 
 ### Data exploration, preprocessing
 
-We did not use the pre-processed bounding box data, we implemented the `global_to_local` and `local_to_global` functions.
-
 We initially normalized the data, then plotted some of the images with their items and bounding boxes:
 
 ![imgs](imgs/object_localization/data_explore_train.png)
@@ -18,10 +16,10 @@ Seems like classes are mostly balanced, looks good.
 
 We then plotted how many images have an item vs no item.
 
+# fixme
 ![imgs](imgs/object_localization/class_dist_item.png)
 
 Seems like the distribution is unequal, the model could get away with guessing that there is an item in the image when there actually is none, so we should keep track of how good the model is at guessing if there is an item in the image or not.
-
 
 Next we had a look at the pixel value distribution
 
@@ -44,31 +42,6 @@ Now there is a clear divide!
 
 And the images still look ok. Nice, hopefully this helps the model.
 
-
-### Model definitions
-
-
-## 1. Approach & Design choices
-
-### Data exploration:
-
-We initially normalized the data.
-
-Then, we did some data exploration.
-Looking at some of the images from the training data:
-
-![class imgs](imgs/object_detection/data_explore_train.png)
-
-The images look different enough, a model could for sure learn the different labels. Each of the bouding boxes also seem appropriate.
-
-Lets check the class distribution:
-
-![class_dis](imgs/object_detection/class_dist.png)
-
-Hmm, seems like there is some class imbalance. One of the classes has twice the counts as all other classes. However, this should not cause any major issues. I dont think the model can get away with being very good at class 1 and ignoring the rest of the images.
-
-![pixel_dist](imgs/object_detection/pixel_dist.png)
-The pixel distribution is nice and normal, but there are (understandably), peaks at 0 and 1. Seems like very white and very black pixels are common in these images. Nothing weird here.
 
 ## 2. Models and hyperparameters
 
@@ -96,27 +69,176 @@ The following hyperparameters have been used:
 
 A grid search over learning rate, weight decay and dropout was used during training of each model. Batch size and number of epochs were kept constant across all trainings.
 
-Here all plots over all model performances:
 
-![nobatch](imgs/object_detection/hyperparams_CNNBaselineNoBatch.png)
+The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
 
-Generally, the baseline with no batch performs ok... etc
+The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
+
+
+# 1. Object detection:
+
+
+## 1. Approach & Design choices
+
+### Data exploration:
+
+NOTE: *We did not use the pre-processed bounding box data, we implemented the `global_to_local` and `local_to_global` functions.*
+
+Initially, we normalized the data, and explored it by plotting some images from the training data. Here are images with index 0-11 in the training data.
+
+![class imgs](imgs/object_detection/data_explore_train.png)
+
+The images look different enough, a model could for sure learn the different labels. Each of the bouding boxes also seem appropriate.
+
+Lets check the class distribution:
+
+![class_dis](imgs/object_detection/class_dist.png)
+
+Hmm, there are slightly more "number 1's" in the images than 0's. The difference is relativley small between them, so this may not be a big issue.
+
+Next, lets plot the pixel distribution of the images
+
+![pixel_dist](imgs/object_detection/pixel_dist_pre.png)
+
+Strange, seems like there is a very high pixel value, even after normalizing.
+Lets find it and plot it.
+
+![pixel_dist](imgs/object_detection/outlier.png)
+
+Ok so we have an outlier at index 24487. What a strange image.
+Considering only one image has this very weird pixel with a value of 5.68 (very large), we can delete it.
+This should not affect model performance to a large degree, as we are deleting one image which (seemingly) has a very strange pixel value.
+
+![pixel_dist](imgs/object_detection/pixel_dist.png)
+
+After deleting that image, the pixel distribution is nice and normal, and there are peaks at 0 and 1. Seems like very white and very black pixels are common in these images. Nothing weird here.
+
+Let's have a look at pixel values outside / inside bounding boxes.
+
+![pixel_dist](imgs/object_detection/inside_outside_pixel_dist_pre_process.png)
+
+Seems like the pixels we are interested in (light green) tend towards higher values.
+We tried to de-noise the data by setting all pixels under a value of 1.5 to 0.
+
+![imgs](imgs/object_detection/inside_outside_pixel_dist_post_process.png)
+
+Now there is a clear divide!
+
+Lets look at some images to see the effect.
+
+![imgs](imgs/object_detection/data_explore_train_post_process.png)
+
+And the images still look ok. Nice, hopefully this helps the model.
+
+### Models
+
+*Loss function*
+
+Before we get into the model, we have to talk about the loss function.
+
+We perform *Localization loss* for all 6 cells (2*3 = 6). In this way the model is trained to evaluate each cell.
+
+*Performance metric*
+
+Models were evaluated using MAP (mean avergae precision). We also added IoU, object accuracy and classification accuracy as additional metrics to view model performance, but MAP score was what decided which model we picked as the "best one"
+MAP is chosen in this task because we can theoretically have "infinite TRUE NEGATIVES", so we need a performance metric that does not use true negatives. We would use recall here awswell, but this could be abused by the model, as it may start to place many more boxes than required.
+
+### Selected models
+
+For object detection, the following models have been used:
+
+| Model                | Description                          |
+|----------------------|--------------------------------------|
+| CNNBaselineNoBatch   | Basic CNN without BatchNorm          |
+| CNNBaselineWithBatch | CNN with BatchNorm                   |
+| CNNLargeKernels      | CNN with larger convolution kernels  |
+| CNNResNet            | CNN with residual connections        |
+| CNNDenseNet          | CNN with dense blocks           |
+
+Generally, the models consits of mulitple sets of:
+
+```text
+Convolutional layer -> batch normalization -> maxpool
+```
+These models were fully convolutional considering the nature of the detection problem.
+
+Models were trained with the following hyperparameters
+
+| Hyperparameter | Values              |
+|----------------|---------------------|
+| Batch size     | 32                  |
+| N epochs       | 15                  |
+| Learning rate  | *1e-3, 1e-4*          |
+| Weight decay   | *0, 1e-2, 1e-4*       |
+
+The same grid search over learning rate and weight decay was used during training, and batch size and number of epochs are constant across trainings.
+Below are plots over all model performances:
+
+## Models and performances
+
+### Baseline model
+
+*Please excuse the spelling mistake in the graph, "Basline" should be "Baseline"*
+
+This baseline model consists of 4 convolutional layers into maxpool layers (and a final output convolutional layer). In order to turn our 48 * 60 input into the required 2x3, we use an uneven kernel size (3x2) in the fourth layer. This model does NOT have batch normalization.
+
+Generally, these baseline models perform well, and some of them may do better, if given more epochs.
+One of the interesting grapphs is the top right model, which has seemingly better validation loss than training loss!
+Another interesting model are the models on the bottom, where the only difference is the learning rate, and one can see that the difference between the two is very small. However, the model with the *slower* learning rate performs slightly better on training data.
+Generally, these models acheive a good class and object accuracy, but their *IoU* is quite quite poor.
+
+![nobatch](imgs/object_detection/hyperparams_CNNBaslineNoBatch.png)
+
+### Baseline + batch norm
+
+This baseline model consists of 4 convolutional layers into maxpool layers (and a final output convolutional layer). In order to turn our 48 * 60 input into the required 2x3, we use an uneven kernel size (3x2) in the fourth layer. This model DOES have batch normalization.
+
+Already from adding batch normalization we can see these models are performing better than our baseline without batch normalization (about an average +10 validation map score at epoch 15). Batch normalization stablizes features distributions in a way that improves training, even without resdidual connections (which we will look at later).
+Generally, these models see stable learnng updates, and models have generally higher validation IoU. The models with higher validation IoU, tend to have a higher validation map score.
+A notable model here is the model with `learning_rate: 0.001, weight_decay: 0.0001`, (row 2, image 1). This model sees a sterk improvement in iou and validation accuracy over epochs. It may be interesting to run this model for more epochs, as it seems the model is still improving. This may however lead to overfit.
 
 ![nobatch](imgs/object_detection/hyperparams_CNNBaselineWithBatch.png)
 
-Generally, the baseline with no batch performs ok... etc
+### CNNLargeKernels
 
-![nobatch](imgs/object_detection/hyperparams_CNNDeep.png)
+This is a similar model to the baselines, but it has quite large kernel sizes
 
-Generally, the baseline with no batch performs ok... etc
+| Layer | Kernel size |
+|----------------|--------|
+| 1  | 7   |
+| 2  | 5   |
+| 3  | 3    |
+| 4  | 3    |
 
-![nobatch](imgs/object_detection/hyperparams_CNNDenseNet.png)
+Increasing kernel sizes increases the receptive field of the neurons, allowing each of them to "see more" of the image.
+This may allow the neurons to learn larger spatial features, gathering broad information.
+However, as the graphs below show, this model underperforms quite a bit. This model is even worse than the baseline without batch normalization.
+Most of the models seem to learn quickly in the start, but then after about 5 epochs, the loss drops very slowly.
+The two bottom models seem to be training nicley, and could perhaps improve given more epochs.
+Looking back, using large kernels + pooling may not be the best for this task, as information is perhaps lost too quickly. It was still an interesting model to try, and now we understand why this architechure is poor for this problem.
 
-Generally, the baseline with no batch performs ok... etc
+![nobatch](imgs/object_detection/hyperparams_CNNLargeKernels.png)
+
+### CNNResNet
+
+A resnet is a kind of model that adds the original input of the image back to the output of layers. This is a typical model for image related tasks, so we expected it to perform well.
+
+Generally, the models perform quite well (validation map around 0.50 at 15 epochs), with the exception of the top right model.
+It has params `learning_rate: 0.001, weight_decay: 0.01`. It's learning seems to stagnate after 6 epochs, learning very slowly.
+These models manage to learn and perform so well becuase they preserve spatial information across multiple layers and learn complex features, but can also localize the objects (since they have the input image).
+
+Most models seem to begin to overfit after about 15 epochs, so perhaps this was a good amount of training time for them. For example, the bottom right model, which has a training loss of almost 0 at the end.
 
 ![nobatch](imgs/object_detection/hyperparams_CNNResNet.png)
 
-Generally, the baseline with no batch performs ok... etc
+### CNNDenseNet
+
+A densenet is a kind of model that uses dense blocks/connections to give the input of previous layers into the future layers. So all features learned in early layers are also given to later layers. The idea is that this preserves spatial information.
+These models seem to perform ok, somewhat better than the baseline with batch norm, but worse than the ResNet.
+Most model learning stagnates after a while, and learning is slow. Validation loss is very closely tied to training loss, meaning that the model is generalizing well.
+Interestingly, the two models on the top of the graph differ a lot in performance, but their only difference is that one has `weight_decay 0`, and the other has `weight_decay 0.01`. The model with weight decay 0 gets a validation map score of `41`, while the other gets a validation map score of `19`.
+
+![nobatch](imgs/object_detection/hyperparams_CNNDenseNet.png)
 
 
 ### Best model:
@@ -133,218 +255,92 @@ Here is its performance:
 
 ![best](imgs/object_detection/best_model.png)
 
-This model does quite well, maybe some overfitting towards the end. It has quite a high iou and class accuracy! Object accuracy is always high.
+This model does quite well.
+It's class and object accuracy is high, but this is the same for all models, the interesting thing is its *IoU* score.
+A validation average IoU score of 0.78 is quite high for a difficult task like this, and shows how the model can really perform.
+This models is somehwta strange as its validation loss goes down slowly, but the validation loss is much more erratic.
+<!-- why??? -->
 
+### Performance of the best model
 
-### 3. Performance
-
-Lets look deeper into how the model performs.
+Lets look deeper into how the best model performs. Now that we have selected it, we can see its performance on test data.
 
 ![best](imgs/object_detection/final_map_scores.png)
 
-The model does very similaraly across all datasets, with a slight decrease in performance on test data. This is to be expected, but still shows that the model generalizes well.
+The model getsa very similary MAP score across all datasets, with a slight decrease in performance on test data. A decrease in test data performance is expected, but this slight decrease shows that the model is generalizing well.
 
-Lets look at map_50 and map_75
+To understand the model closer, we can look at map_50 and map_75
 
 ![best](imgs/object_detection/final_map_50_scores.png)
 
-Wow! This is very high! Looks like the model does very well here. IT is #todo
+Looks like the model does very well here. Map 50 is easier, it means that ... TODO
 
 ![best](imgs/object_detection/final_map_75_scores.png)
 
-Much the same story as total map.
+Map 75 is much the story as the total map score, getting 75% is much harder
 
 ### Class confusion matrix
 
-Lets look at a class confusion matrix.
+Lets look at a class confusion matrix, firstly on training data.
 
 ![best](imgs/object_detection/class_confusion_matrix_train_train.png)
 
+And then on test data.
+
 ![best](imgs/object_detection/class_confusion_matrix_test_test.png)
 
-Seems like the model is quite good at understanding differences between 0/1 in an image. Both in training and test data.
+Seems like the model is quite good at understanding differences between 0/1 in an image. Both in training and test data. We already knew this from our graph, and all models quickly understood this.
 
-Lets look deeper into bounding box rmse
+Lets look deeper into the bounding boxes. One way to look at this is "bounding box RMSE"
 
-
+Firstly on train.
 ![best](imgs/object_detection/bb_rmse_train.png)
+
+And then on test.
 
 ![best](imgs/object_detection/bb_rmse_test.png)
 
 Seems like for both train and test, our RMSE for the images of the letter 1 are a fair bit higher, perhaps these bounding boxes are generally harder to predict?
 This score may seem really low, but considering we are working with normalized data, this is actually fairly high.
 
-Next, lets see our models predictions.
+Let us view some actual predictions
 
 Firstly lets see ALL box predictions on training data:
+
+Here we can see ALL the boxes predicted by our model. Ok seems to work.
 
 ![img](imgs/object_detection/data_predict_train_all_imgs_boxes.png)
 
 Lets add non-max-suppression:
 
+There is no difference, as none of the boxes are really overlapping.
+
 ![img](imgs/object_detection/data_predict_train_all_imgs_boxes_iou.png)
 
-No difference.
-
 Lets add non max suppression AND only pick boxes with a confidence higher than 0.5.
+Looks like the model is struggling. Some images it gets right, but others it is completely off on.
 
 ![img](imgs/object_detection/data_predict_train_all_imgs_boxes_confidence.png)
 
-Looks like the model is struggling. Some images it gets right, but others it is completely off on.
-
-Lets have a look at the test data:
+Lets have a look at the test data with non-max suppression and only showing boxes with a confidence score higher than 0.5
 
 ![img](imgs/object_detection/data_predict_test_all_imgs_boxes_confidence.png)
 
 Looks like our model is performing alright!
 
-Sometimes our bounding box is not really covering the image, but generally our model manages to understand the class, and ish where the bounding box should be.
+Sometimes our bounding box is not really covering the right number, but generally our model manages to understand the class, and ish where the bounding box should be. Much like the test data, sometimes it is completely off.
 
 
+### Given more time
 
-## 5. Results
-
-
-### Object localization
-
-The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
-
-The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
-
-
-# -----------------------------
-
-# Object detection
-
-### Object detection
-
-For object detection, the following models have been used:
-
-| Model                | Description                          |
-|----------------------|--------------------------------------|
-| CNNBaselineNoBatch   | Basic CNN without BatchNorm          |
-| CNNBaselineWithBatch | CNN with BatchNorm                   |
-| CNNLargeKernels      | CNN with larger convolution kernels  |
-| CNNResNet            | CNN with residual connections        |
-| CNNDenseNet          | CNN with dense connections           |
-
-The same models are used here, except for using CNNLargeKernels rather than CNNDeep. 
-
-The following hyperparameters have been used:
-
-| Hyperparameter | Values              |
-|----------------|---------------------|
-| Batch size     | 32                  |
-| N epochs       | 15                  |
-| Learning rate  | 1e-3, 1e-4          |
-| Weight decay   | 0, 1e-2, 1e-4       |
-
-The same grid search over learning rate and weight decay was used during training, and batch size and number of epochs are constant across trainings.
-
-### Object detection
-
-For object detection, the best model was CNNResNet with these hyperparameters:
-
-| Hyperparameter | Values |
-|----------------|--------|
-| Learning rate  | 1e-3   |
-| Weight decay   | 1e-4   |
-
-The performance of this model on validation data was:
-
-| Metric                   | Value  |
-|--------------------------|--------|
-| Accuracy                 | 0.9984 |
-| IoU                      | 0.7812 |
-| Mean of accuracy and IoU | 0.8898 |
-| Mean Average Precision   | 0.5417 |
-
-The graph below shows the map score of this model through the epochs.
-
-(SETT INN BILDE)
-
-
-### Results
-# todo
-
-We had 4 different models, a baseline, a deep one, a wide one, and a model with dropout enabled.
-
-Here are the hyperparameters chosen to try:
-
-| Parameter      | Values       | Notes                                       |
-| -------------- | ------------ | ------------------------------------------- |
-| Learning Rate  | 0.001, 0.01  |                       |
-| Momentum       | 0.5, 0.9     |                       |
-| Weight Decay   | 0.0001, 0.01 |                       |
-| Dropout Rate   | 0.2, 0.4     | Only for dropout model                      |
-| Epochs Checked | 5, 15, 30    | Model performance evaluated at these points |
-
-We chose these in order to have a fair amount of hyperparameters, without having too many, causing training to take a long time. We could maybe have tried values of 0 for params such as momentum, weight decay, etc, but we thought this would be more interesting. *We also talked to a group leader, she said these were good.*
-
-We chose to run our models for **30** epochs maximum, to reduce training time.
-As stated above, we evaluate model performance while training, at 5, 15 and 30 epochs.
-
-
-Below are the model architectures as well as how the models performed.
-
-### Baseline:
-
-### Best model.
-
-The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see its performance:
-
-![best_model](imgs/pipeline/best_model.png)
-
-It had a validation accuracy of **0.880**, but this is not extraordinary, as other models had very close validation accuracies, like one of the wide models which acheived a validation accuracy of **0.878**.
-
-What is interesting is this model seems to overfit, as its valiadation loss is quite high, but as disucssed earlier, loss function =/= performance metric. The validation loss is high and the model may be unsure, but the validation accuracy says this is the best model. Perhaps we should choose some other model, use early stopping or the likes, but for this project, we select based on validation accuracy.
-
-Lets see some confusion matricies on the model performance:
-
-**Train data**
-
-![conf_train](imgs/pipeline/confusion_matrix_train.png)
-
-Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well. The model may be able to get away with being slightly worse at one class since we are using accuracy and not F1 score.
-
-**Validation data**
-
-![conf_val](imgs/pipeline/confusion_matrix_validation.png)
-
-The validation data tells a similar story to that of the training data, as it does well on planes, and a fair bit worse on birds, albeit a bit worse across the board.
-
-With a performance metric like accuracy, a model may sometimes get away with guessing slightly more of one class than the other. 
-
-Generally, the model manages to guess almost all planes as planes. It is a little worse on birds, sometimes guessing them as planes. But the model performs well.
-
-**Test data**
-
-Finally, we tested the best model on test data. It got a test accuracy of **0.854**, which is pretty good. The model seems to have generalized well.
-
-![conf_test](imgs/pipeline/confusion_matrix_test.png)
-
-Again, a similar case for the test data, but now the model is worse on correctly predicting planes. The model generalizes, but not as well as on validation data. Perhaps the test data includes some particularly hard to spot images of birds/planes? Let's have a look.
-
-**Incorrectly classified images**
-
-Here are misclassified images in the test set and the model's confidence in its prediction.
-
-![wrong_test](imgs/pipeline/wrong_images_test.png)
-
-Some images are clearly very "On the edge", like the very first image (index = 0) includes a bird, but the probability of a plane (0.54) was just slightly higher. So this image was a toss up. Other images are completely different, for instance the image with index = 3, the model is 100% certain is a plane, while we can see it is a close-up of a bird.
-
-Closeups seem to really confuse the model, as it tends to be very incorrect, being 100% sure closeups of bird and planes, and vice-versa.
-
-Why is the model making mistakes? First off, the task is hard. Birds and planes are oftentimes in the sky, so using the blue background is not an option to distinugish them.
-The specific model we chose actually had quite a high validation loss, and this can help explain the sometimes wildly incorrect predictions.
-
-### Did something go against expectations?
-
-I had high hopes for the dropout model as from previous experience, these can be very effective. Perhaps given more data, time, layers or "wideness", these could perform well.
+Given more time, it would be interesting to train certain models for more epochs (not all, as some were overfitting). It would also be interesting to try some sort of data augmentation, to create new images.
 
 ## Conclusion:
 
-Generally, the models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn. Overall, many of the images were correctly identified, and the model generalized.
+Generally, the models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn.
+Overall, for both the localization and detection tasks, many of the numbers within the images were located and correctly classified.
+
+Interestingly, non-max suppression did not matter so much for object detection, as the best model did not seem to create so many overlapping boxes.
 
 ## On the use of AI
 
@@ -354,25 +350,4 @@ In [the format uib wishes](https://www.uib.no/en/nt/180737/examples-how-you-can-
 
 ## Divison of labour
 
-Henrik Brøgger did parts 1 (backpropagation) and 3 (machine learning pipeline). While Tobias Skodven did part 2 (gradient descent). 
-Report work was shared.
-
-
-#
-# notes:
-# num of layers affects size of receptive field
-# kernel size affects ability to see complicated things
-# we need to use MAP
-
-# we could compute bounding boxes and accuracy
-
-# since we can really have inifnite true negatives, we have to use precision
-
-# precsion : TP / TP + FP <- we can abuse by placing few boxes
-# recall : TP / TP + FN <- we can abuse by placing many many boxes
-
-# MAP:
-# mean precision is mean precision for one class
-
-# if iou is more than half then we got a TP
-# but if multiple, pick the one with highest IOU, rest are FN
+Henrik Brøgger did the code for object_detection + object_localization. While Tobias Skodven and Henrik Brøgger both worked on the report.
