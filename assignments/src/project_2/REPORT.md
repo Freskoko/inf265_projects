@@ -24,6 +24,126 @@ The pixel distribution is nice and normal, but there are (understandably), peaks
 
 ## 2. Model hyperparamters:
 
+
+## 2. Models and hyperparameters
+
+### Object localization
+
+For object localization, the following models have been used:
+
+| Model                | Description                    |
+|----------------------|--------------------------------|
+| CNNBaselineNoBatch   | Basic CNN without BatchNorm    |
+| CNNBaselineWithBatch | CNN with BatchNorm             |
+| CNNDeep              | Deeper CNN                     |
+| CNNResNet            | CNN with residual connections  |
+| CNNDenseNet          | CNN with dense connections     |
+
+We used a combination of simple and more complex models to see how it affects performance. Since there is only one object per image, the models use fully connected layers for the final prediction.
+
+The following hyperparameters have been used:
+
+| Hyperparameter | Values       |
+|----------------|--------------|
+| Batch size     | 32           |
+| N epochs       | 15           |
+| Learning rate  | 1e-3, 1e-4   |
+| Weight decay   | 0, 1e-4      |
+| Dropout        | 0, 0.3       |
+
+A grid search over learning rate, weight decay and dropout was used during training of each model. Batch size and number of epochs were kept constant across all trainings.
+
+### Object detection
+
+For object detection, the following models have been used:
+
+| Model                | Description                          |
+|----------------------|--------------------------------------|
+| CNNBaselineNoBatch   | Basic CNN without BatchNorm          |
+| CNNBaselineWithBatch | CNN with BatchNorm                   |
+| CNNLargeKernels      | CNN with larger convolution kernels  |
+| CNNResNet            | CNN with residual connections        |
+| CNNDenseNet          | CNN with dense connections           |
+
+The same models are used here, except for using CNNLargeKernels rather than CNNDeep. 
+
+The following hyperparameters have been used:
+
+| Hyperparameter | Values              |
+|----------------|---------------------|
+| Batch size     | 32                  |
+| N epochs       | 15                  |
+| Learning rate  | 1e-3, 1e-4          |
+| Weight decay   | 0, 1e-2, 1e-4       |
+
+The same grid search over learning rate and weight decay was used during training, and batch size and number of epochs are constant across trainings.
+
+## 3. Performance
+
+### Object localization
+
+For object localization, the best model was CNNResNet with these hyperparameters:
+
+| Hyperparameter | Values |
+|----------------|--------|
+| Learning rate  | 1e-4   |
+| Weight decay   | 1e-4   |
+| Dropout        | 0.3    |
+
+The performance of this model on validation data was:
+
+| Metric                   | Value  |
+|--------------------------|--------|
+| Accuracy                 | 0.9483 |
+| IoU                      | 0.6200 |
+| Mean of accuracy and IoU | 0.7842 |
+
+The graph below shows the accuracy of this model through the epochs.
+
+(SETT INN BILDE)
+
+### Object detection
+
+For object detection, the best model was CNNResNet with these hyperparameters:
+
+| Hyperparameter | Values |
+|----------------|--------|
+| Learning rate  | 1e-3   |
+| Weight decay   | 1e-4   |
+
+The performance of this model on validation data was:
+
+| Metric                   | Value  |
+|--------------------------|--------|
+| Accuracy                 | 0.9984 |
+| IoU                      | 0.7812 |
+| Mean of accuracy and IoU | 0.8898 |
+| Mean Average Precision   | 0.5417 |
+
+The graph below shows the map score of this model through the epochs.
+
+(SETT INN BILDE)
+
+## 4. Plots
+
+
+
+## 5. Results
+
+### Results
+# todo
+
+### Object localization
+
+The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
+
+The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
+
+
+
+
+### Object detection
+
 ### Results
 # todo
 
