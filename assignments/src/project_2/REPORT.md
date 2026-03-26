@@ -4,6 +4,8 @@
 
 ### Data exploration, preprocessing
 
+We did not use the pre-processed bounding box data, we implemented the `global_to_local` and `local_to_global` functions.
+
 We initially normalized the data, then plotted some of the images with their items and bounding boxes:
 
 ![imgs](imgs/object_localization/data_explore_train.png)
@@ -41,6 +43,7 @@ Now there is a clear divide!
 ![imgs](imgs/object_localization/data_explore_train_post_process.png)
 
 And the images still look ok. Nice, hopefully this helps the model.
+
 
 ### Model definitions
 
@@ -118,7 +121,7 @@ Generally, the baseline with no batch performs ok... etc
 
 ### Best model:
 
-the best model was CNNResNet with these hyperparameters:
+the best model was CNNResNet with these hyperparameters. It was chosen based on "map" score.
 
 | Hyperparameter | Values |
 |----------------|--------|
@@ -135,12 +138,72 @@ This model does quite well, maybe some overfitting towards the end. It has quite
 
 ### 3. Performance
 
+Lets look deeper into how the model performs.
+
+![best](imgs/object_detection/final_map_scores.png)
+
+The model does very similaraly across all datasets, with a slight decrease in performance on test data. This is to be expected, but still shows that the model generalizes well.
+
+Lets look at map_50 and map_75
+
+![best](imgs/object_detection/final_map_50_scores.png)
+
+Wow! This is very high! Looks like the model does very well here. IT is #todo
+
+![best](imgs/object_detection/final_map_75_scores.png)
+
+Much the same story as total map.
+
+### Class confusion matrix
+
+Lets look at a class confusion matrix.
+
+![best](imgs/object_detection/class_confusion_matrix_train_train.png)
+
+![best](imgs/object_detection/class_confusion_matrix_test_test.png)
+
+Seems like the model is quite good at understanding differences between 0/1 in an image. Both in training and test data.
+
+Lets look deeper into bounding box rmse
+
+
+![best](imgs/object_detection/bb_rmse_train.png)
+
+![best](imgs/object_detection/bb_rmse_test.png)
+
+Seems like for both train and test, our RMSE for the images of the letter 1 are a fair bit higher, perhaps these bounding boxes are generally harder to predict?
+This score may seem really low, but considering we are working with normalized data, this is actually fairly high.
+
+Next, lets see our models predictions.
+
+Firstly lets see ALL box predictions on training data:
+
+![img](imgs/object_detection/data_predict_train_all_imgs_boxes.png)
+
+Lets add non-max-suppression:
+
+![img](imgs/object_detection/data_predict_train_all_imgs_boxes_iou.png)
+
+No difference.
+
+Lets add non max suppression AND only pick boxes with a confidence higher than 0.5.
+
+![img](imgs/object_detection/data_predict_train_all_imgs_boxes_confidence.png)
+
+Looks like the model is struggling. Some images it gets right, but others it is completely off on.
+
+Lets have a look at the test data:
+
+![img](imgs/object_detection/data_predict_test_all_imgs_boxes_confidence.png)
+
+Looks like our model is performing alright!
+
+Sometimes our bounding box is not really covering the image, but generally our model manages to understand the class, and ish where the bounding box should be.
+
 
 
 ## 5. Results
 
-### Results
-# todo
 
 ### Object localization
 
@@ -226,7 +289,7 @@ Below are the model architectures as well as how the models performed.
 
 ### Baseline:
 
-### Best model. 
+### Best model.
 
 The best model is selected by valiadation accuracy. The model with the best valiadation accuracy was one of the baseline models. Below you can see its performance:
 
