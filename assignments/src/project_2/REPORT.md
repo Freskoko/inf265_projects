@@ -16,8 +16,7 @@ Seems like classes are mostly balanced, looks good.
 
 We then plotted how many images have an item vs no item.
 
-# fixme
-![imgs](imgs/object_localization/class_dist_item.png)
+![imgs](imgs/object_localization/class_dist_items.png)
 
 Seems like the distribution is unequal, the model could get away with guessing that there is an item in the image when there actually is none, so we should keep track of how good the model is at guessing if there is an item in the image or not.
 
@@ -25,7 +24,7 @@ Next we had a look at the pixel value distribution
 
 ![imgs](imgs/object_localization/pixel_dist.png)
 
-Looks alright, normalization worked.
+Looks normal, with peaks at -2 and ~2.7.
 
 Next up, we had a look at the pixel values outside/inside the bounding boxes.
 
@@ -43,7 +42,27 @@ Now there is a clear divide!
 And the images still look ok. Nice, hopefully this helps the model.
 
 
-## 2. Models and hyperparameters
+### Models
+
+*Loss function*
+
+Before we get into the model, we have to talk about the loss function.
+
+We perform *Localization loss* for the image. Localization loss for the image. This loss function consitsts of three parts.
+
+1. Detection loss, "is there an item in the image?"
+2. Localization loss, "Where is the item in the image"?
+3. Classfication loss, "What class is in the image"?
+
+We chose to have all three to have equal weight. In hindsight however there could be some merit to weighting "where is the item in the image" as a more important component, since this is what the model seemed to struggle on.
+
+*Performance metric*
+
+Models were evaluated using class accuracy and IoU as the main performance measures, taking their mean. From now on if this report mentions "accuracy", it means the mean of class accuracy and IoU.
+We also included object accuracy as a secondary metric, but almost all models very quickly were perfect when guessing if there was an item in the image or not.
+
+
+### Selected models
 
 For object localization, we tried a wide range of models to see how they performed.
 
@@ -56,8 +75,9 @@ For object localization, we tried a wide range of models to see how they perform
 | CNNDenseNet          | CNN with dense connections + Batchnorm     |
 
 Since there is only one object per image, the models use fully connected layers for the final prediction.
+In this last fully connected layer we added dropout for regularization.
 
-The following hyperparameters have been used:
+The following hyperparameters were selected:
 
 | Hyperparameter | Values       |
 |----------------|--------------|
@@ -69,14 +89,127 @@ The following hyperparameters have been used:
 
 A grid search over learning rate, weight decay and dropout was used during training of each model. Batch size and number of epochs were kept constant across all trainings.
 
+## Models and performances
 
-The best model does not appears to underfit, but overfits slighty. Training accuracy is a little bit higher than validation accuracy, but not enough to suggest a severe overfitting.
+### Baseline model
 
-The results show a good accuracy score, while IoU is lower. This suggests that the model struggles to accurately locate the bounding box for the objects.
+This baseline model consists of 3 convolutional layers into maxpool layers, and a fully connected layer (with dropout), and the output layer. Kernel sizes are 3*3, with padding 1 and stride 1, keeping the dimensions the same, and the maxpool is responisbile for reducing dimension size. This model DOES have batch normalization.This model does NOT have batch normalization.
 
+Generally, these baseline models perform decently well, but halfof them overfit. The 4 models in the top of the graph shows signs of overfitting, as validation loss increases while train loss decreases. The bottom four show a different curve, where train and validation loss decrease steadily together. The top models have the same learning rate (0.001) and this is why we see overfit there, while hte bottom models have a low learning rate (0.0001), which is why they are taking a long time to learn. It may seem like the bottom 4 models are better, but looking at validation accuracy and the loss, the top four models are performing generally better.
+
+Generally, these models acheive a good class and object accuracy, but their *IoU* varies quite a bit, some models getting 0.41, while others acheving IoU's of 0.59.
+
+![nobatch](imgs/object_localization/hyperparams_CNNBaselineNoBatch.png)
+
+### Baseline + batch norm
+
+This baseline model consists of 3 convolutional layers into maxpool layers, and a fully connected layer (with dropout), and the output layer. Kernel sizes are 3*3, with padding 1 and stride 1, keeping the dimensions the same, and the maxpool is responisbile for reducing dimension size. This model DOES have batch normalization.
+
+These models are very similar to the other basline above, but do generally slighly better, seeing just slight improvements in validation score. This shows the effect that batch norm has, in creating more stable updates for the model.
+
+![batch](imgs/object_localization/hyperparams_CNNBaselineWithBatch.png)
+
+### CNNDeep
+
+This model is very similar to the two baselines, but instead of 3, it has *4* convolutional layers. This model is more complex, and can hopefully learn more complex/abstract features from images.
+
+There are some interesting models here, most notably the bottom right one, which managed to have a lower validation loss than training loss for any epochs, until about epoch 8 where validation loss is lower than training loss.
+For these models, we again see a slight improvement in validation accurcacy.
+These models, much like earlier ones, are really good at determining if there is an item in the image, and what class it is, but getting any IoU over 0.60 seems difficult.
+
+![nobatch](imgs/object_localization/hyperparams_CNNDeep.png)
+
+### CNNDenseNet
+
+A densenet is a kind of model that uses dense blocks/connections to give the input of previous layers into the future layers. So all features learned in early layers are also given to later layers. The idea is that this preserves spatial information.
+
+Generally, the models perform quite well, but their validaton losses are somewhat erratic.
+
+![nobatch](imgs/object_localization/hyperparams_CNNDenseNet.png)
+
+### CNNResNet
+
+A resnet is a kind of model that adds the original input of the image back to the output of layers. This is a typical model for image related tasks, so we expected it to perform well.
+
+Generally, the models perform quite well (validation accuracy around 0.70 at 15 epochs), with the bottom right model even reaching a validation accuracy of 0.75.
+Interestingly, these models do quite well on IoU, but their class accuracy is a little bit lower than that of the baseline models. These models manage to learn and perform so well becuase they preserve spatial information across multiple layers and learn complex features.
+
+Most models are doing quite well even after 15 epochs, and it would be interesting to perhaps train some of them for a longer period of time. Certain models however are obviously overfitting (bottom 2), but their validation accuracies are still increasing. An interesting example of the fact that loss function =/= performance metric
+
+Interestingly, the bottom four models seem to have an erratic validation loss, jumping up and down. These are the four models with a low learning rate (0.0001), but after 15 epochs, they have much the same validation scores as the models with a higher learning rate (0.001).
+
+![nobatch](imgs/object_localization/hyperparams_CNNResNet.png)
+
+
+### Best model:
+
+the best model was CNNResNet with these hyperparameters. It was chosen based on validation accuracy score.
+
+| Hyperparameter | Values |
+|----------------|--------|
+| Learning rate  | 1e-4   |
+| Weight decay   | 1e-4   |
+| Dropout        | 0.3    |
+
+
+Here is a graph showing its performance:
+
+![best](imgs/object_localization/best_model.png)
+
+It's object accuracy is high, but this is the same for all models, the interesting thing is its *IoU*  and *class accuracy score*.
+A validation average IoU score of 0.62 is quite high for a difficult task like this, and shows how the model can really perform. It's class accuracy is quite good, almost perfect. Looking at its "mean accuracy", which is our main performance metric, we can see that the class accuracy is dragging the mean accuracy up, and the iou is dragging it down.
+
+There is some sign of overfitting as validation and train losses are diverging, but the mean accuracy performance metric is increasing, so it is not a negative, perhaps given more epochs the validation mena accuracy would fall.
+
+### Performance of the best model
+
+Lets look deeper into how the best model performs. Now that we have selected it, we can see its performance on test data.
+
+![best](imgs/object_localization/final_accuracy_scores.png)
+
+The model getsa very similary mean accuracy score across all datasets, with a slight decrease in performance on test/validation data. A decrease in test data performance is expected, but only a slight decrease shows that the model is generalizing well.
+
+### Class confusion matrix
+
+Lets look at an object confusion matrix, firstly on training data.
+
+![best](imgs/object_localization/object_confusion_matrix_train.png)
+
+And then on validation data.
+
+![best](imgs/object_localization/object_confusion_matrix_val.png)
+
+And then on test data.
+
+![best](imgs/object_localization/object_confusion_matrix_test.png)
+
+The model is generally quite good at understanding when there is an item in the image.
+
+### Bounding boxes
+
+Lets look deeper into the bounding boxes. One way to look at this is "bounding box RMSE"
+
+Firstly on train.
+![best](imgs/object_localization/bb_rmse_train.png)
+
+Then on validation
+![best](imgs/object_localization/bb_rmse_val.png)
+
+And then on test.
+![best](imgs/object_localization/bb_rmse_test.png)
+
+Seems like across train, validation and test, our RMSE for the images of the letter 1 and 4 are a fair bit higher, perhaps these bounding boxes are generally harder to predict?
+The scores (0.05) may seem really low, but considering we are working with normalized data, this is actually fairly high.
+Otherwise, all classes see a similar bounding box rmse.
+
+Next, let us view some actual predictions.
+
+![best](imgs/object_localization/data_predict_train.png)
+
+Looks like our model is managing to predict the bounding boxes for test data quite well!
+They are not perfect, but they manage to somewhat capture the items.
 
 # 1. Object detection:
-
 
 ## 1. Approach & Design choices
 
@@ -259,7 +392,6 @@ This model does quite well.
 It's class and object accuracy is high, but this is the same for all models, the interesting thing is its *IoU* score.
 A validation average IoU score of 0.78 is quite high for a difficult task like this, and shows how the model can really perform.
 This models is somehwta strange as its validation loss goes down slowly, but the validation loss is much more erratic.
-<!-- why??? -->
 
 ### Performance of the best model
 
@@ -337,10 +469,12 @@ Given more time, it would be interesting to train certain models for more epochs
 
 ## Conclusion:
 
-Generally, the models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn.
+Generally, the all models perform well, but vary depending on the parameters chosen. Certain models overfit, others struggle to learn.
 Overall, for both the localization and detection tasks, many of the numbers within the images were located and correctly classified.
 
 Interestingly, non-max suppression did not matter so much for object detection, as the best model did not seem to create so many overlapping boxes.
+
+The model that worked the best on both tasks, was a resnet model, where both of them has the same weight decay, but differed by learning rate. The object localization model has a learning rate of 0.0001, while the object detection resnet model had a learning rate of 0.001.
 
 ## On the use of AI
 
