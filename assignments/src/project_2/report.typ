@@ -518,24 +518,25 @@ This score may seem really low, but considering we are working with normalized d
 
 Let us view some actual predictions
 
-Firstly lets see ALL box predictions on training data:
+Firstly lets see ALL box predictions on validation data:
 
 Here we can see ALL the boxes predicted by our model. Ok seems to work.
 
-#figure(image("imgs/object_detection/data_predict_train_all_imgs_boxes.png", width: 80%))
+#figure(image("imgs/object_detection/data_predict_val_all_imgs_boxes.png", width: 80%))
 
 Lets add non-max-suppression:
 
 There is no difference, as none of the boxes are really overlapping.
 
-#figure(image("imgs/object_detection/data_predict_train_all_imgs_boxes_iou.png", width: 80%))
+#figure(image("imgs/object_detection/data_predict_val_all_imgs_boxes_iou.png", width: 80%))
 
 Lets add non max suppression AND only pick boxes with a confidence higher than 0.5.
-Looks like the model is struggling. Some images it gets right, but others it is completely off on.
 
-#figure(image("imgs/object_detection/data_predict_train_all_imgs_boxes_confidence.png", width: 80%))
+#figure(image("imgs/object_detection/data_predict_val_all_imgs_boxes_confidence.png", width: 80%))
 
-Lets have a look at the test data with non-max suppression and only showing boxes with a confidence score higher than 0.5
+Looks like the model doing quite well, but struggling on some images. The boxes could be in better spots.
+
+Finally, lets have a look at the test data with non-max suppression and only showing boxes with a confidence score higher than 0.5
 
 #figure(image("imgs/object_detection/data_predict_test_all_imgs_boxes_confidence.png", width: 80%))
 
