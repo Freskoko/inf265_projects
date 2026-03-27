@@ -228,7 +228,7 @@ Lets look deeper into how the best model performs. Now that we have selected it,
 
 The model getsa very similary mean accuracy score across all datasets, with a slight decrease in performance on test/validation data. A decrease in test data performance is expected, but only a slight decrease shows that the model is generalizing well.
 
-=== Class confusion matrix
+=== Object confusion matrix
 
 Lets look at an object confusion matrix, firstly on training data.
 
@@ -265,9 +265,16 @@ Otherwise, all classes see a similar bounding box rmse.
 
 Next, let us view some actual predictions.
 
+Firstly on validation data.
+
+#figure(
+  image("imgs/object_localization/data_predict_val.png", width: 80%),
+  caption: [Predictions on validation data],
+)
+
 #figure(
   image("imgs/object_localization/data_predict_test.png", width: 80%),
-  caption: [Actual predictions],
+  caption: [Predictions on test data],
 )
 
 Looks like our model is managing to predict the bounding boxes for test data quite well!
