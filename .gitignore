@@ -5,3 +5,7 @@
 
 assignments/src/project_1/models
 .env
+
+assignments/src/project_3/01_encoder_sentiment_classifier/imdb_train
+assignments/src/project_3/01_encoder_sentiment_classifier/imdb_test
+assignments/src/project_3/02_decoder_chatbot/gooaq_subset
