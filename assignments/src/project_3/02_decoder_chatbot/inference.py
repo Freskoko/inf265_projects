@@ -1,15 +1,63 @@
+import numpy as np
 import torch
 
 def greedy_sampling(last_token_logits):
-    # TODO: Implement greedy sampling (input is the logits of the last token, output is the selected token ID)
-    print(last_token_logits)
-    most_likely = torch.max(last_token_logits)
-    print(most_likely)
-    return most_likely
+    # greedy sampling (input is the logits of the last token, output is the selected token ID)
+    return torch.argmax(last_token_logits)
+
+
+# For top-p sampling, the assignment states:
+
+# We then sort the probabilities in descending order and calculate the cumulative distribution function (CDF) to find the tokens needed to reach the top p = 0.95 probability mass. In this case, we have 0.643 + 0.154 + 0.154 = 0.951, so we choose the tokens corresponding to the indices [3, 1, 6] and *randomly sample from this set of tokens to get the next token in the sequence.*
+
+# Do we pick either 3, 1 or 6 completely randomly? (33% chance for each) or do we pick either once based on their prior probabilities? (0.643, 01.54, 0.154)? (they do not add up to 1 so we would need to resample to a new distribution).
+
 
 def top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
-    # TODO: Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
-    ...
+    # Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
+
+    # softmax
+    logits = last_token_logits / temperature
+    probs = torch.softmax(logits, dim=-1)
+
+    # get p
+    sorted_probs, sorted_indices = torch.sort(probs, descending=True)
+    cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+
+    where_threshold_reached = cumulative_probs <= p
+
+    # we need to pick atleast something (what if we never reach threshold!)
+    where_threshold_reached[0] = True
+
+    filtered_indices = sorted_indices[where_threshold_reached]
+
+    # get logits back
+    top_p_logits = logits[filtered_indices]
+
+    random_index = torch.randint(len(top_p_logits))
+
+    return logits[random_index].unsqueeze(0)
+
+def old_top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
+    # Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
+    outputs = []
+    for token in last_token_logits:
+        numerator = (torch.exp(token) / temperature)
+        denominator = (torch.exp(last_token_logits) / temperature)
+        softmaxed = (numerator / denominator)
+        outputs.append((token, softmaxed))
+
+    descending_sorted = sorted(outputs, key = lambda x: x[1])
+
+    to_choose_from = []
+    total = 0
+    for token, softmaxed in descending_sorted:
+        total += softmaxed
+        to_choose_from.append(token)
+        if total >= p:
+            return np.random.choice(to_choose_from)
+
+    raise ValueError("Issue with top p sampling, no choices!")
 
 def sample_sequence(input_sequence, model, strategy, max_len, device, end_id, p=0.95, temperature=0.7):
     model.eval()
@@ -68,16 +116,16 @@ if __name__ == "__main__":
 
     input_sequence = tokenize_input(tokenizer, question_text, sep_id) 
 
-    print("Greedy sampling:")
-    answer = sample_sequence(input_sequence, model, "greedy", 100, config.device, end_id)
-    answer_text = decode_output(tokenizer, answer)
-    print(f"Question: {question_text}")
-    print(f"Answer: {answer_text}")
-
-    # print("Top-p sampling (p=0.95, temperature=0.7):")
-    # answer = sample_sequence(input_sequence, model, "top-p", 100, config.device, end_id, p=0.95, temperature=0.7)
+    # print("Greedy sampling:")
+    # answer = sample_sequence(input_sequence, model, "greedy", 100, config.device, end_id)
     # answer_text = decode_output(tokenizer, answer)
     # print(f"Question: {question_text}")
     # print(f"Answer: {answer_text}")
+
+    print("Top-p sampling (p=0.95, temperature=0.7):")
+    answer = sample_sequence(input_sequence, model, "top-p", 100, config.device, end_id, p=0.95, temperature=0.7)
+    answer_text = decode_output(tokenizer, answer)
+    print(f"Question: {question_text}")
+    print(f"Answer: {answer_text}")
 
 
