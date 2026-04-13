@@ -2,9 +2,14 @@ import torch
 
 def greedy_sampling(last_token_logits):
     # TODO: Implement greedy sampling (input is the logits of the last token, output is the selected token ID)
+    print(last_token_logits)
+    most_likely = torch.max(last_token_logits)
+    print(most_likely)
+    return most_likely
 
 def top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
     # TODO: Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
+    ...
 
 def sample_sequence(input_sequence, model, strategy, max_len, device, end_id, p=0.95, temperature=0.7):
     model.eval()
@@ -69,10 +74,10 @@ if __name__ == "__main__":
     print(f"Question: {question_text}")
     print(f"Answer: {answer_text}")
 
-    print("Top-p sampling (p=0.95, temperature=0.7):")
-    answer = sample_sequence(input_sequence, model, "top-p", 100, config.device, end_id, p=0.95, temperature=0.7)
-    answer_text = decode_output(tokenizer, answer)
-    print(f"Question: {question_text}")
-    print(f"Answer: {answer_text}")
+    # print("Top-p sampling (p=0.95, temperature=0.7):")
+    # answer = sample_sequence(input_sequence, model, "top-p", 100, config.device, end_id, p=0.95, temperature=0.7)
+    # answer_text = decode_output(tokenizer, answer)
+    # print(f"Question: {question_text}")
+    # print(f"Answer: {answer_text}")
 
 
