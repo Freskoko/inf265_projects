@@ -44,7 +44,8 @@ class DecoderBlock(nn.Module):
             attn_mask = attn_mask,
             need_weights = False,
             is_causal = True
-        )
+        )[0] # todo unsure about this, returns tuple
+        # attn_output.transpose(1, 0), attn_output_weights
 
         x_l1 += x
         # ---- l2
@@ -53,7 +54,6 @@ class DecoderBlock(nn.Module):
         x_l2 += x_l2_norm
         return x_l2
 
-# ------
 
 # TODO:  but make sure to move the positional encoding values to the 8 same device as the input sequence in the forward method.
 class PositionalEncoding(nn.Module):
@@ -133,7 +133,7 @@ class TransformerModel(nn.Module):
         Generates an upper triangular mask to prevent attending to future tokens.
         """
         matrix = torch.ones(seq_len, seq_len)
-        matrix = torch.triu(diagonal=1)
+        matrix = torch.triu(matrix, diagonal=1)
         return matrix
 
 if __name__ == "__main__":
