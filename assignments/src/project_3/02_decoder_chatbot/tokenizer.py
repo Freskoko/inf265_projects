@@ -63,5 +63,3 @@ if __name__ == "__main__":
     print(f"Encoded: {encoded.ids}")
     decoded = tokenizer.decode(encoded.ids, skip_special_tokens=False)
     print(f"Decoded: {decoded}")
-
-
