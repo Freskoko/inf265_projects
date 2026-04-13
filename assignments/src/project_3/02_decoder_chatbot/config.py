@@ -40,7 +40,7 @@ config = SimpleNamespace(**{
 
 
 # Uncomment the below code to use a tiny model for testing your code before GPU training
-"""
+
 if config.device == "cpu":
     config.vocab_size = 5000
     config.embed_size = 16 
@@ -50,4 +50,4 @@ if config.device == "cpu":
     config.num_epochs = 1
     config.max_len = 32
     config.model_train_fraction = 0.1
-"""
+
