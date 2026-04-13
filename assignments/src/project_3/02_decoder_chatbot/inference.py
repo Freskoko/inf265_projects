@@ -5,14 +5,6 @@ def greedy_sampling(last_token_logits):
     # greedy sampling (input is the logits of the last token, output is the selected token ID)
     return torch.argmax(last_token_logits)
 
-
-# For top-p sampling, the assignment states:
-
-# We then sort the probabilities in descending order and calculate the cumulative distribution function (CDF) to find the tokens needed to reach the top p = 0.95 probability mass. In this case, we have 0.643 + 0.154 + 0.154 = 0.951, so we choose the tokens corresponding to the indices [3, 1, 6] and *randomly sample from this set of tokens to get the next token in the sequence.*
-
-# Do we pick either 3, 1 or 6 completely randomly? (33% chance for each) or do we pick either once based on their prior probabilities? (0.643, 01.54, 0.154)? (they do not add up to 1 so we would need to resample to a new distribution).
-
-
 def top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
     # Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
 
