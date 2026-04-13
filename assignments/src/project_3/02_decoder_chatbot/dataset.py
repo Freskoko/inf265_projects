@@ -36,21 +36,21 @@ class QADataset(Dataset):
         ids_answer = tokenized_answer.ids
 
         # combined
-        ids_src = ids_question + [self.pad_id] + ids_answer
+        ids_src = ids_question + [self.sep_id] + ids_answer
 
         # end token
-        ids_src += self.end_id
+        ids_src += [self.end_id]
 
         # padding / truncate
         ids_src = ids_src[:self.max_length]
         length_needed_padding = self.max_length - len(ids_src)
-        ids_src += [self.pad_idx] * length_needed_padding
+        ids_src += [self.pad_id] * length_needed_padding
 
         # target is source 1 pos forward
         source = torch.tensor(ids_src, dtype=torch.long)
         target = source.clone()
         target[:-1] = source[1:]
-        target[-1] = self.pad_id
+        target[-1] = -100 # we dont want loss on this one
 
         # padding mask
         padding_mask = (source == self.pad_id)
