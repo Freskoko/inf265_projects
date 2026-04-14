@@ -250,3 +250,44 @@ The MLP block linearly projects the data up 4 times its original dimensions, bef
 The output is scaled back down again, before being output.
 
 Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
+
+
+
+
+
+-
+-
+-
+
+== Issues
+
+I ran into an issue when first training the model. I forgot to add `.bool()` to the casual mask. The result was that the model was able to see the next token in the sequence! The model then managed to acheive a perfect performance on training data, as it learned to just repeat the last token in the sequence. I had trained a parrot basically.
+
+```python
+  def generate_causal_mask(self, seq_len):
+      matrix = torch.ones(seq_len, seq_len)
+      matrix = torch.triu(matrix, diagonal=1) # forgot .bool()!
+      return matrix
+```
+
+It was easy to see that something was wrong because the model achieved an astonishing almost 0 loss on the training data.
+
+#figure(
+  caption: "Parrot model",
+    image(
+    "02_decoder_chatbot/figs/losses_over_epochs_parrot.png",
+    width: 50%,
+  ),
+)
+
+Here is an example of a conversation with a parrot:
+
+#figure(
+  caption: "Parrot model",
+    image(
+    "02_decoder_chatbot/figs/parrot.png",
+    width: 50%,
+  ),
+)
+
+Pretty much just repeating the last token again and again.
