@@ -29,7 +29,7 @@ After making the data less complex, we tokenized the text. Firstly, we add the `
 The model expects inputs to be of a certain size, so we truncate the ids to a set `max_length`, or adding
 padding to `max_length` if the text is too short.
 
-== Transformer model (encoding block)
+=== Transformer model (encoding block)
 
 The encoder block consists of two main layers.
 
@@ -55,29 +55,33 @@ The output is scaled back down again, before being output.
 
 Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
 
-== Overview to approach for solving the tasks
+=== Overview to approach for solving the tasks
 
 Read #link("https://arxiv.org/abs/1706.03762")[Attention is all you need], and the chapter on transformers in the #link("udlbook.github.io/udlbook/")[course book]
 
-== Results
+// TODO! MORE HERE
+
+=== Results
 
 #figure(
   caption: "Loss over time",
   image(
-    "01_encoder_sentiment_classifier/figs/losses_over_epochs.png"
+    "01_encoder_sentiment_classifier/figs/losses_over_epochs.png",
+    width: 70%,
   )
 )
 
-The loss decreases smoothly over time for both validation and training datasets.
+The loss for the training set reduces smoothly, slowing down slightly between epoch 2 to 3. The loss decreases linearly over epochs for the validation set, a sign of generalization.
 
 #figure(
   caption: "Accuracy over time",
     image(
-    "01_encoder_sentiment_classifier/figs/accuracy_over_epochs.png"
+    "01_encoder_sentiment_classifier/figs/accuracy_over_epochs.png",
+    width: 70%,
   )
 )
 
-The accuracy decreases smoothly over time for both validation and training datasets.
+The accuracy for the training set gradually increases, slowing down between epoch 2 to 3. The accuracy increases linearly over epochs for the validation set, a sign of generalization.
 
 #figure(
   caption: "Final performance on datasets",
@@ -102,11 +106,14 @@ Based on the performance on the three datasets, the model generalizes quite well
 #figure(
   caption: "Confusion matrix on test data",
     image(
-    "01_encoder_sentiment_classifier/figs/cf.png"
-  )
+    "01_encoder_sentiment_classifier/figs/cf.png",
+    width: 80%,
+  ),
 )
 
-== Interesting movie reviews
+Based on the above confusion matrix, the model seems to mostly manage to guess correctly wether a review is negative or positive, but it tends to prefer guessing positive, as it has twice as many False Positives (#text("2000~")) as False Negatives (#text("1000~")).
+
+=== Interesting movie reviews
 
 #figure(
   caption: "Model predictions on selected movie reviews",
@@ -152,7 +159,7 @@ The review for "Twilight 1" is very negative, but instead of being direct in its
 
 One of the most interesting reviews is the review for "RuPaul's Drag Race". The model guesses this review as very negative, even though the review is very positive. Perhaps some of the words like "Groundbreaking" and "Eye candy" are a bit too abstract to understand as having positive meaning. Perhaps the training data has few examples of words like this, causing the model to shoot towards a negative prediction.
 
-== Custom model predictions
+=== Custom model predictions
 
 #figure(
   caption: "Custom model predictions a",
@@ -182,7 +189,6 @@ One of the most interesting reviews is the review for "RuPaul's Drag Race". The 
 It was Interesting to see how the model would perform on negations of words, like "not good". Interesting, the model considers "not good" to be positive! But when we add more "not", the model eventually leans towards the review being negative.
 This is a great example of how transformers do not actually care about the "directon" of text, and really look at the text as a whole. Perhaps the model has learned "good" is positive, but "not" is negative, and that is why adding more "not"'s makes the model lean more negativley.
 
-== Custom model predictions
 
 #figure(
   caption: "Custom model predictions b",
@@ -211,3 +217,36 @@ This is a great example of how transformers do not actually care about the "dire
 Much like earlier, the model is fooled by negations. In this case "not bad" is scored very negativley, but adding more "not" to the review causes the model to be slightly less negative. Somewhat opposite of what we saw earlier. Perhaps the model has different associations when "not" is used with "good" and "bad".
 
 The two examples above show that the model struggles heavily with negations.
+
+
+== Part 2: Decoder-only Model for Text Generation
+
+In this task we ...
+
+=== Transformer model (decoder block)
+
+// WRONG BELOW:
+
+The encoder block consists of two main layers.
+
+Layer 1 includes normalization, followed by multi-head attention, and then dropout.
+
+`Layer Norm` -> `Multi-Head attention` -> `Dropout`
+
+The magic in this layer is what happens in the `Multi-head attention`.
+This part linearly projects queries, keys and values some arbitrary `n` times. Attention is performed on each of these projections, which are then added together, and projected a final time.
+If one were to use only one head for attention, it would be harder for the model to remember multiple parts of the input text simulatenously.
+The idea is that each of the heads can remember information from different represenations.
+
+The attention mechanism works by mapping a query and key-value pairs to some output. Each value is assigned a weight, computed by a function between the query and the key. For scaled dot-product attention, the dot product of the query with all the keys is taken, scaled and ran through a softmax function. The softmax function provides the weights for each value.
+
+Between layer 1 and 2, a skip connection is used, adding the output from layer 1, and the initial input together, before feeding this new output into layer 2.
+
+Layer 2 includes normalization, an MLP block, and dropout.
+
+`Layer Norm` -> `MLP` -> `Dropout`
+
+The MLP block linearly projects the data up 4 times its original dimensions, before applying the `GELU` activation function, adding non-linearity. `GELU` is chosen because it can handle both positive and slightly negative values. `GELU` may work well in this case, because a typical network with `RELU` can suffer #link("https://chadrick-kwag.net/posts/relu-gelu-swish-mish-activation-function-comparison/")[if many neurons in a network become zero].
+The output is scaled back down again, before being output.
+
+Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
