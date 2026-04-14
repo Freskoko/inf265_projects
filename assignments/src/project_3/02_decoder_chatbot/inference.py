@@ -30,7 +30,7 @@ def top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
     # get logits back
     next_token = torch.multinomial(filtered_probs, 1)
 
-    return filtered_indices[next_token].item()
+    return filtered_indices[next_token]
 
 
 def sample_sequence(input_sequence, model, strategy, max_len, device, end_id, p=0.95, temperature=0.7):
