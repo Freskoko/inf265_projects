@@ -6,7 +6,7 @@ from config import config
 from model import TransformerModel
 from inference import sample_sequence, tokenize_input, decode_output
 
-# Hack to prevent streamlit error 
+# Hack to prevent streamlit error
 torch.classes.__path__ = []
 
 @st.cache_resource
@@ -58,12 +58,46 @@ if prompt := st.chat_input("Type your question...", max_chars=100):
     st.chat_message("user").write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Sample answer from model 
+    # ------------------
+    # Sample answer from model
     input_sequence = tokenize_input(tokenizer, prompt, sep_id)
     answer = sample_sequence(input_sequence, model, strategy, config.max_len, config.device, end_id, p=top_p, temperature=temperature)
     answer_text = decode_output(tokenizer, answer)
 
     st.chat_message("assistant").write(answer_text)
     st.session_state.messages.append({"role": "assistant", "content": answer_text})
+    # ------------------
 
+    # # Sample answers from both strategies
+    # input_sequence = tokenize_input(tokenizer, prompt, sep_id)
 
+    # answer_greedy = sample_sequence(
+    #     input_sequence.clone(), model, "greedy",
+    #     config.max_len, config.device, end_id
+    # )
+
+    # answer_top_p = sample_sequence(
+    #     input_sequence.clone(), model, "top-p",
+    #     config.max_len, config.device, end_id,
+    #     p=top_p, temperature=temperature
+    # )
+
+    # answer_greedy_text = decode_output(tokenizer, answer_greedy)
+    # answer_top_p_text = decode_output(tokenizer, answer_top_p)
+
+    # # Display side-by-side
+    # col1, col2 = st.columns(2)
+
+    # with col1:
+    #     st.markdown("**Greedy**")
+    #     st.write(answer_greedy_text)
+
+    # with col2:
+    #     st.markdown(f"**Top-p (p={top_p}, τ={temperature})**")
+    #     st.write(answer_top_p_text)
+
+    # # Store in chat history
+    # st.session_state.messages.append({
+    #     "role": "assistant",
+    #     "content": f"**Greedy:** {answer_greedy_text}\n\n**Top-p:** {answer_top_p_text}"
+    # })
