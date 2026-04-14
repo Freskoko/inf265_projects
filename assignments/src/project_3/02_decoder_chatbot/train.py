@@ -96,7 +96,10 @@ def train_model(config):
         train_info["losses"].append(mean_epoch_loss)
         print(f"\nMean Epoch Cross-Entropy Loss: {mean_epoch_loss:.4f}")
 
-    torch.save(model.state_dict(), config.model_filename)
+    # torch.save(model.state_dict(), config.model_filename)
+    # saves the model without the _orig_mod prefixes which causes errors in streamlit
+    torch.save(model._orig_mod.state_dict(), config.model_filename)
+
     torch.save(optimizer.state_dict(), config.optimizer_filename)
 
     return model, train_info
