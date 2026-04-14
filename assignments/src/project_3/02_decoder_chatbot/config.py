@@ -11,7 +11,7 @@ config = SimpleNamespace(**{
     "dataset": "gooaq_subset",
     "split": "train",
     "device": "cpu" if not torch.cuda.is_available() else "cuda",
-    
+
     # Tokenizer config
     "vocab_size": 20_000,
     "min_frequency": 5,
@@ -20,7 +20,7 @@ config = SimpleNamespace(**{
     "end_token": "[END]",
     "pad_token": "[PAD]",
     "tokenizer_filename": "temp/tokenizer.json",
-    
+
     # Model config
     "embed_size": 512,
     "num_heads": 8,
@@ -41,13 +41,13 @@ config = SimpleNamespace(**{
 
 # Uncomment the below code to use a tiny model for testing your code before GPU training
 
-if config.device == "cpu":
-    config.vocab_size = 5000
-    config.embed_size = 16 
-    config.num_heads = 2
-    config.num_layers = 2
-    config.batch_size = 32
-    config.num_epochs = 1
-    config.max_len = 32
-    config.model_train_fraction = 0.1
+# if config.device == "cpu":
+#     config.vocab_size = 5000
+#     config.embed_size = 16
+#     config.num_heads = 2
+#     config.num_layers = 2
+#     config.batch_size = 32
+#     config.num_epochs = 1
+#     config.max_len = 32
+#     config.model_train_fraction = 0.1
 
