@@ -63,36 +63,151 @@ Read #link("https://arxiv.org/abs/1706.03762")[Attention is all you need], and t
 
 #figure(
   caption: "Loss over time",
- table(
-    columns: (1fr, auto),
-    inset: 5pt,
-    align: horizon,
-    table.header(
-      [*Data set*], [*Accuracy*],
-    ),
-    "Train",
-    "0.868",
-    "Validation",
-    "0.853",
-    "Test",
-    "0.849"
+  image(
+    "01_encoder_sentiment_classifier/figs/losses_over_epochs.png"
   )
 )
+
+The loss decreases smoothly over time for both validation and training datasets.
+
+#figure(
+  caption: "Accuracy over time",
+    image(
+    "01_encoder_sentiment_classifier/figs/accuracy_over_epochs.png"
+  )
+)
+
+The accuracy decreases smoothly over time for both validation and training datasets.
 
 #figure(
   caption: "Final performance on datasets",
  table(
-    columns: (1fr, auto),
+    columns: (5cm, 5cm),
     inset: 5pt,
     align: horizon,
     table.header(
       [*Data set*], [*Accuracy*],
     ),
     "Train",
-    "0.868",
+    "0.875",
     "Validation",
-    "0.853",
+    "0.845",
     "Test",
-    "0.849"
+    "0.847"
   )
 )
+
+Based on the performance on the three datasets, the model generalizes quite well. The drop in accuracy on both the validation and test set is small, and proves our model manages to classify reviews it has not yet seen.
+
+#figure(
+  caption: "Confusion matrix on test data",
+    image(
+    "01_encoder_sentiment_classifier/figs/cf.png"
+  )
+)
+
+== Interesting movie reviews
+
+#figure(
+  caption: "Model predictions on selected movie reviews",
+  table(
+    columns: (1fr, 3fr, auto, auto),
+    inset: 5pt,
+    align: horizon,
+
+    table.header(
+      [*Title*], [*Review*], [*Sentiment*], [*Score*],
+    ),
+
+    "The Matrix",
+    "The timeless classic. This film doesn't age, it will be contemporary even in 2030 or 2040. Wachowski's best one, by far.",
+    "Positive", "0.93",
+
+    "Police Academy 4: Citizens on Patrol",
+    "There is not much good about the movie. The acting is bad. The writing is vomitous...",
+    "Negative", "0.0096",
+
+    "Neil Breen, Fateful Findings",
+    "In all seriousness this movie is only enjoyable if you have a group of friends and a large amount of alcohol...",
+    "Positive", "0.59",
+
+    "RuPaul's Drag Race",
+    "Groundbreaking TV and total eye-candy",
+    "Negative", "0.019",
+
+    "Twilight 1",
+    "Catherine Hardwicke, please put the camera down...",
+    "Negative", "0.47",
+
+  )
+)
+
+The model somewhat manages to correctly predict the movie reviews given in the above table. However, sometimes the model is quite sure about its answer, and sometimes it is very unsure about its answer.
+
+The review of "The Matrix" is extremely positive, and the model gave it a score accordingly (0.93).I was unsure if certain words like names (wachowski) or years (2030, 2040) was going to make the model less sure about its prediction, since these words may not exist in the training set, but this was not the case.
+
+The model nails "Police Academy 4", understanding that the review claims it is a bad movie. The way the review is written is very "straightforward", not using many metaphors, being direct in its criticism, making it an easy guess for the model.
+
+The review for "Twilight 1" is very negative, but instead of being direct in its cristicsm it says things like "You have no talent" and "Please put the camera down". This less direct review may make the model less sure about the prediction, causing it to predict 0.47. Correctly guessing this as a negative review, but just by a little bit.
+
+One of the most interesting reviews is the review for "RuPaul's Drag Race". The model guesses this review as very negative, even though the review is very positive. Perhaps some of the words like "Groundbreaking" and "Eye candy" are a bit too abstract to understand as having positive meaning. Perhaps the training data has few examples of words like this, causing the model to shoot towards a negative prediction.
+
+== Custom model predictions
+
+#figure(
+  caption: "Custom model predictions a",
+  table(
+    columns: (1fr, 3fr, auto, auto),
+    inset: 5pt,
+    align: horizon,
+
+    table.header(
+      [*Title*], [*Review*], [*Sentiment*], [*Score*],
+    ),
+    "Custom review a1",
+    "not good",
+    "Positive", "0.99",
+
+    "Custom review a2",
+    "not not good",
+    "Positive", "0.97",
+
+    "Custom review a3",
+    "not not not good",
+    "Positive", "0.77",
+
+  )
+)
+
+It was Interesting to see how the model would perform on negations of words, like "not good". Interesting, the model considers "not good" to be positive! But when we add more "not", the model eventually leans towards the review being negative.
+This is a great example of how transformers do not actually care about the "directon" of text, and really look at the text as a whole. Perhaps the model has learned "good" is positive, but "not" is negative, and that is why adding more "not"'s makes the model lean more negativley.
+
+== Custom model predictions
+
+#figure(
+  caption: "Custom model predictions b",
+  table(
+    columns: (1fr, 3fr, auto, auto),
+    inset: 5pt,
+    align: horizon,
+
+    table.header(
+      [*Title*], [*Review*], [*Sentiment*], [*Score*],
+    ),
+    "Custom review b1",
+    "not bad",
+    "Negative", "0.0011",
+
+    "Custom review b2",
+    "not not bad",
+    "Negative", "0.0013",
+
+    "Custom review b3",
+    "not not not bad",
+    "Negative", "0.0015",
+  )
+)
+
+Much like earlier, the model is fooled by negations. In this case "not bad" is scored very negativley, but adding more "not" to the review causes the model to be slightly less negative. Somewhat opposite of what we saw earlier. Perhaps the model has different associations when "not" is used with "good" and "bad".
+
+The two examples above show that the model struggles heavily with negations.
