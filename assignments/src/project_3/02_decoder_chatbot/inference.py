@@ -90,11 +90,11 @@ if __name__ == "__main__":
 
     input_sequence = tokenize_input(tokenizer, question_text, sep_id)
 
-    # print("Greedy sampling:")
-    # answer = sample_sequence(input_sequence, model, "greedy", 100, config.device, end_id)
-    # answer_text = decode_output(tokenizer, answer)
-    # print(f"Question: {question_text}")
-    # print(f"Answer: {answer_text}")
+    print("Greedy sampling:")
+    answer = sample_sequence(input_sequence, model, "greedy", 100, config.device, end_id)
+    answer_text = decode_output(tokenizer, answer)
+    print(f"Question: {question_text}")
+    print(f"Answer: {answer_text}")
 
     print("Top-p sampling (p=0.95, temperature=0.7):")
     answer = sample_sequence(input_sequence, model, "top-p", 100, config.device, end_id, p=0.95, temperature=0.7)
