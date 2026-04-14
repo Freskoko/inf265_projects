@@ -49,9 +49,7 @@ class DecoderBlock(nn.Module):
 
         x_l1 += x
         # ---- l2
-        x_l2_norm = self.ln2(x_l1)
-        x_l2 = self.mlpblock(x_l2_norm)
-        x_l2 += x_l2_norm
+        x_l2 = x_l1 + self.mlpblock(self.ln2(x_l1))
         return x_l2
 
 
@@ -133,7 +131,7 @@ class TransformerModel(nn.Module):
         Generates an upper triangular mask to prevent attending to future tokens.
         """
         matrix = torch.ones(seq_len, seq_len)
-        matrix = torch.triu(matrix, diagonal=1)
+        matrix = torch.triu(matrix, diagonal=1).bool()
         return matrix
 
 if __name__ == "__main__":
