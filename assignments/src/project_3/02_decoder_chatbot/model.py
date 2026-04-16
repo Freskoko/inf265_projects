@@ -1,35 +1,99 @@
 import torch
 import torch.nn as nn
 
+class MLPBlock(nn.Module):
+    def __init__(self, dim, dropout=0.1):
+        super().__init__()
+        self.fc1 = nn.Linear(dim, 4*dim)
+        self.gelu = nn.GELU()
+        self.fc2 = nn.Linear(4*dim, dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.gelu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.dropout(x)
+        return x
+
 class DecoderBlock(nn.Module):
     def __init__(self, embed_size, num_heads, dropout):
         super().__init__()
-        # TODO: Implement this method
+
+        self.ln1 = nn.LayerNorm(embed_size)
+
+        self.mh1 = nn.MultiheadAttention(
+            embed_dim=embed_size, num_heads=num_heads, dropout=dropout, batch_first=True
+        )
+
+        self.ln2 = nn.LayerNorm(embed_size)
+
+        # build in dropout here
+        self.mlpblock = MLPBlock(embed_size, dropout=dropout)
+
 
     def forward(self, x, attn_mask, padding_mask):
-        # TODO: Implement this method
+        # ---- l1
+        x_l1 = self.ln1(x)
+        x_l1 = self.mh1(
+            query = x_l1,
+            key = x_l1,
+            value = x_l1,
+            key_padding_mask = padding_mask,
+            attn_mask = attn_mask,
+            need_weights = False,
+            is_causal = True
+        )[0] # todo unsure about this, returns tuple
+        # attn_output.transpose(1, 0), attn_output_weights
+
+        x_l1 += x
+        # ---- l2
+        x_l2 = x_l1 + self.mlpblock(self.ln2(x_l1))
+        return x_l2
 
 
+# TODO:  but make sure to move the positional encoding values to the 8 same device as the input sequence in the forward method.
 class PositionalEncoding(nn.Module):
     """
     Positional encoding module: adds positional information to the input embeddings.
     """
     def __init__(self, embed_size, max_len):
         super().__init__()
-        # TODO: Implement this method
-        # Use self.register_bufffer("positional_encoding", positional_encoding) to store the positional encoding (not a parameter)
+        super().__init__()
+        # from attention is all you need part 3.5
+        positions = torch.arange(0, max_len).unsqueeze(1)
+
+        iarange = torch.arange(0, embed_size, 2)
+
+        div_term =  (10000.0 **((iarange) / embed_size)) # is this 2 correct?
+
+        pe = torch.zeros(max_len, embed_size)
+
+        # sin to even
+        pe[:, 0::2] = torch.sin(positions / div_term)
+
+        # cos to odd
+        pe[:, 1::2] = torch.cos(positions / div_term)
+
+        pe = pe.unsqueeze(0)
+
+        self.register_buffer("pos_encodings",pe)
 
     def forward(self, x):
-        # TODO: Implement this method
-        # Remember to slice the positional encoding to match the length of the input sequence
-        # and to move the positional encoding to the device of the input tensor
+        # add positional
+        #  to the input embeddings x
+        x_end = x.size(1)
+        x = x + self.pos_encodings[:, :x_end, :]
+        # we want it all from pos 1 to end of x
+        return x
 
 
 class TransformerModel(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.embed_size = config.embed_size
-        self.num_layers = config.num_layers 
+        self.num_layers = config.num_layers
         self.vocab_size = config.vocab_size
         self.max_len = config.max_len
         self.dropout_p = config.dropout_p
@@ -66,9 +130,9 @@ class TransformerModel(nn.Module):
         """
         Generates an upper triangular mask to prevent attending to future tokens.
         """
-        # TODO: Implement this method
-        # You can use torch.ones and torch.triu to generate the mask and cast it to a boolean tensor with .bool()
-
+        matrix = torch.ones(seq_len, seq_len)
+        matrix = torch.triu(matrix, diagonal=1).bool()
+        return matrix
 
 if __name__ == "__main__":
     from tokenizers import Tokenizer

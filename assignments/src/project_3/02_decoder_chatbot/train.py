@@ -48,6 +48,11 @@ def train_model(config):
 
     scaler = torch.amp.GradScaler(config.device) if config.device == "cuda" else None
 
+
+    train_info = {
+        "losses" : [],
+    }
+
     for epoch in range(config.num_epochs):
         model.train()
         total_loss = 0
@@ -62,7 +67,7 @@ def train_model(config):
             target = target.to(config.device)
             key_padding_mask = key_padding_mask.to(config.device)
 
-            if scaler is not None: 
+            if scaler is not None:
                 with torch.autocast("cuda"):
                     out = model(source, padding_mask=key_padding_mask)
                     loss = criterion(out.transpose(1, 2), target)
@@ -82,17 +87,22 @@ def train_model(config):
                 f"[{epoch + 1:02} | {config.num_epochs:02}] Loss: {loss.item():.4f}"
             )
 
+
             if (batch_idx + 1) % 500 == 0:  # Save checkpoint every 500 batches
                 torch.save(model.state_dict(), config.model_filename)
                 torch.save(optimizer.state_dict(), config.optimizer_filename)
 
         mean_epoch_loss = total_loss / len(train_loader)
+        train_info["losses"].append(mean_epoch_loss)
         print(f"\nMean Epoch Cross-Entropy Loss: {mean_epoch_loss:.4f}")
 
-    torch.save(model.state_dict(), config.model_filename)
+    # torch.save(model.state_dict(), config.model_filename)
+    # saves the model without the _orig_mod prefixes which causes errors in streamlit
+    torch.save(model._orig_mod.state_dict(), config.model_filename)
+
     torch.save(optimizer.state_dict(), config.optimizer_filename)
 
-    return model
+    return model, train_info
 
 
 if __name__ == "__main__":

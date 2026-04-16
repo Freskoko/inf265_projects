@@ -4,7 +4,7 @@ from datasets import load_from_disk
 
 class QADataset(Dataset):
     def __init__(
-        self, config, tokenizer, 
+        self, config, tokenizer,
     ):
         self.dataset = load_from_disk(config.dataset)
         n_subset = int(config.model_train_fraction * len(self.dataset))
@@ -27,12 +27,40 @@ class QADataset(Dataset):
     def __getitem__(self, idx):
         question, answer = self.dataset[idx]["question"], self.dataset[idx]["answer"]
 
-        # TODO: Implement this method
+        # question
+        tokenized_question = self.tokenizer.encode(question)
+        ids_question = tokenized_question.ids
+
+        # answer:
+        tokenized_answer = self.tokenizer.encode(answer)
+        ids_answer = tokenized_answer.ids
+
+        # combined
+        ids_src = ids_question + [self.sep_id] + ids_answer
+
+        # end token
+        ids_src += [self.end_id]
+
+        # padding / truncate
+        ids_src = ids_src[:self.max_length]
+        length_needed_padding = self.max_length - len(ids_src)
+        ids_src += [self.pad_id] * length_needed_padding
+
+        # target is source 1 pos forward
+        source = torch.tensor(ids_src, dtype=torch.long)
+        target = source.clone()
+        target[:-1] = source[1:]
+        target[-1] = -100 # we dont want loss on this one
+
+        # padding mask
+        padding_mask = (source == self.pad_id)
+        # set to -100 in target for padding, not important
+        target[padding_mask] = -100
 
         return {
-            "source_sequence": ..., 
-            "target_sequence": ...,
-            "key_padding_mask": ...,
+            "source_sequence": source,
+            "target_sequence": target,
+            "key_padding_mask": padding_mask,
         }
 
 
@@ -41,6 +69,7 @@ if __name__ == "__main__":
     from tokenizers import Tokenizer
 
     # Sanity check the dataset class
+    print(config.tokenizer_filename)
     tokenizer = Tokenizer.from_file(config.tokenizer_filename)
     idx = 1
     config.max_len = 64 # For testing purposes

@@ -1,10 +1,37 @@
+import numpy as np
 import torch
 
 def greedy_sampling(last_token_logits):
-    # TODO: Implement greedy sampling (input is the logits of the last token, output is the selected token ID)
+    # greedy sampling (input is the logits of the last token, output is the selected token ID)
+    return torch.argmax(last_token_logits)
 
 def top_p_sampling(last_token_logits, p=0.95, temperature=0.7):
-    # TODO: Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
+    # Implement top-p sampling with temperature (input is the logits of the last token, output is the selected token ID)
+
+    # softmax
+    logits = last_token_logits / temperature
+    probs = torch.softmax(logits, dim=-1)
+
+    # get p
+    # gives both sorted prob and indicies
+    sorted_probs, sorted_indices = torch.sort(probs, descending=True)
+    cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+
+    where_threshold_reached = cumulative_probs <= p
+
+    # we need to pick atleast something (what if we never reach threshold!)
+    where_threshold_reached[0] = True
+
+    filtered_probs = sorted_probs[where_threshold_reached]
+    filtered_indices = sorted_indices[where_threshold_reached]
+
+    filtered_probs = filtered_probs / filtered_probs.sum()
+
+    # get logits back
+    next_token = torch.multinomial(filtered_probs, 1)
+
+    return filtered_indices[next_token]
+
 
 def sample_sequence(input_sequence, model, strategy, max_len, device, end_id, p=0.95, temperature=0.7):
     model.eval()
@@ -61,7 +88,7 @@ if __name__ == "__main__":
 
     question_text = "what is the largest dog breed?"
 
-    input_sequence = tokenize_input(tokenizer, question_text, sep_id) 
+    input_sequence = tokenize_input(tokenizer, question_text, sep_id)
 
     print("Greedy sampling:")
     answer = sample_sequence(input_sequence, model, "greedy", 100, config.device, end_id)

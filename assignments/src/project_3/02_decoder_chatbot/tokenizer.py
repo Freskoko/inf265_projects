@@ -10,7 +10,7 @@ def train_tokenizer(config):
     # Load the training data and select a subset to train the tokenizer on
     dataset = load_from_disk(config.dataset)
 
-    # Concatenate the question and answer strings 
+    # Concatenate the question and answer strings
     print("Combining strings...")
     train_texts = [example_to_text(example) for example in tqdm(dataset)]
 
@@ -63,5 +63,3 @@ if __name__ == "__main__":
     print(f"Encoded: {encoded.ids}")
     decoded = tokenizer.decode(encoded.ids, skip_special_tokens=False)
     print(f"Decoded: {decoded}")
-
-
