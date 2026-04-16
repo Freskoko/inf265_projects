@@ -252,12 +252,34 @@ The output is scaled back down again, before being output.
 Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
 
 
+=== BPE Tokenizer
 
+This project uses the byte-pair encoding tokenizer, to encode input text. Initially it buiilds an "alphabet" of all symbols in the total text input.
+Using this alphabet, we merge together pairs in the alphabet such that it matches those that were often present in the total text input.
+Now we add the merged pair back into the alphabet, and keep going. After a while, often used peices of text will have merged together, while rarer tokens will be smaller.
+We keep merging until we reach a preset vocabulary size, and those are our tokens.
 
+=== Results
 
--
--
--
+#figure(
+  caption: "Training loss for decoder model",
+    image(
+    "02_decoder_chatbot/figs/losses_over_epochs.png",
+    width: 50%,
+  ),
+)
+
+As the graph above shows, the model learns smoothly on training data.
+Perhaps given more time it would be benefical to train the model even longer, as it seems like training loss could go lower.
+However, we do not have a validation dataset to compare, so overfitting would be hard to detect.
+
+A conversation with the bot is somewhat funny, yet interesting.
+It seems to generally understand the "feeling" or "vibe" of the conversation, but fails to come up with any actual reasonable, or even syntaxically correct answer.
+Below are some interesting conversations.
+
+Seems like the model has difficulties with negations, much like the earlier model.
+TODO: Try who is "Not" the president.
+
 
 == Issues
 
@@ -291,3 +313,19 @@ Here is an example of a conversation with a parrot:
 )
 
 Pretty much just repeating the last token again and again.
+
+=== Given more time
+
+Given more time, more extenstive training of the decoder model could have been attempted.
+
+
+== On the use of AI
+
+TODO
+AI was used in this project, to assist in bug-fixing, plot creation, and understanding of the learning material.
+AI has been cited in the code where appropriate.
+In the format uib wishes: The service ChatGPT has been used to generate code for plotting and debugging. ChatGPT was also used to inquire into the differences between loss function and performance measure in terms of this assignment.
+
+== Divison of labour
+
+Henrik Brøgger did the code and report
