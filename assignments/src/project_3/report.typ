@@ -282,7 +282,7 @@ Seems like the model has difficulties with negations, much like the earlier mode
 === Interesting responses
 
 #figure(
-  caption: "Model responses",
+  caption: "Model responses, Greedy VS Top-p",
   table(
     columns: (auto, auto),
     inset: 5pt,
@@ -298,19 +298,64 @@ Seems like the model has difficulties with negations, much like the earlier mode
         "02_decoder_chatbot/figs/chatbot_2.png",
         width: 100%,
       ),
+            image(
+        "02_decoder_chatbot/figs/chatbot_6.png",
+        width: 100%,
+      ),
+      image(
+        "02_decoder_chatbot/figs/chatbot_5.png",
+        width: 100%,
+      ),
+    ),
+  )
+)
+
+#figure(
+  caption: "Model responses, Temperature experiments",
+  table(
+    columns: (auto, auto),
+    inset: 5pt,
+    align: horizon,
+
+    table.header(
+      [*Temperature = 2*], [*Temperature = 0.1*],
+      image(
+        "02_decoder_chatbot/figs/chatbot_3.png",
+        width: 100%,
+      ),
+      image(
+        "02_decoder_chatbot/figs/chatbot_4.png",
+        width: 100%,
+      )
     ),
   )
 )
 
 
 #figure(
-  caption: "Interesting response",
-    image(
-    "02_decoder_chatbot/figs/chatbot_1.png",
-    width: 100%,
-  ),
-)
+  caption: "Model responses, Top p experiments (Temperature = 0.7 for all 3)",
+  table(
+    columns: (auto, auto, auto),
+    inset: 5pt,
+    align: horizon,
 
+    table.header(
+            [*Top-p = 0.1*], [*Top-p = 0.5*], [*Top-p = 0.95*],
+    image(
+      "02_decoder_chatbot/figs/top_p_0_1.png",
+      width: 100%,
+    ),
+      image(
+      "02_decoder_chatbot/figs/top_p_0_5.png",
+      width: 100%,
+    ),
+      image(
+      "02_decoder_chatbot/figs/top_p_0_95.png",
+      width: 100%,
+    ),
+    ),
+  )
+)
 
 == Issues
 
