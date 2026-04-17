@@ -278,7 +278,38 @@ It seems to generally understand the "feeling" or "vibe" of the conversation, bu
 Below are some interesting conversations.
 
 Seems like the model has difficulties with negations, much like the earlier model.
-TODO: Try who is "Not" the president.
+
+=== Interesting responses
+
+#figure(
+  caption: "Model responses",
+  table(
+    columns: (auto, auto),
+    inset: 5pt,
+    align: horizon,
+
+    table.header(
+      [*Greedy*], [*Top-p*],
+      image(
+        "02_decoder_chatbot/figs/chatbot_1.png",
+        width: 100%,
+      ),
+      image(
+        "02_decoder_chatbot/figs/chatbot_2.png",
+        width: 100%,
+      ),
+    ),
+  )
+)
+
+
+#figure(
+  caption: "Interesting response",
+    image(
+    "02_decoder_chatbot/figs/chatbot_1.png",
+    width: 100%,
+  ),
+)
 
 
 == Issues
