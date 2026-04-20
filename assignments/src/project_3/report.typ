@@ -446,6 +446,6 @@ AI was used in this project, to assist in bug-fixing, and understanding of the l
 AI has been cited in the code where appropriate.
 In the format uib wishes: The service Google Gemini has been used to generate code for debugging. Gemini was also used to inquire into creating appropriate preprocessing steps.
 
-== Divison of labour
+// == Divison of labour
 
-Henrik Brøgger did the code and report
+// Henrik Brøgger did the code and report
