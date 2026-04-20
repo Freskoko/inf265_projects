@@ -444,7 +444,7 @@ To conclude, we successfully implemented and tranined an encoder and decoder mod
 
 AI was used in this project, to assist in bug-fixing, and understanding of the learning material.
 AI has been cited in the code where appropriate.
-In the format uib wishes: The service Google Gemini has been used to generate code for debugging. Gemini was also used to inquire into ...
+In the format uib wishes: The service Google Gemini has been used to generate code for debugging. Gemini was also used to inquire into creating appropriate preprocessing steps.
 
 == Divison of labour
 
