@@ -287,11 +287,11 @@ Seems like the model has difficulties with negations, much like the earlier mode
       [*Greedy*], [*Top-p*],
       image(
         "02_decoder_chatbot/figs/chatbot_1.png",
-        width: 100%,
+        width: 125%,
       ),
       image(
         "02_decoder_chatbot/figs/chatbot_2.png",
-        width: 100%,
+        width: 125%,
       )
     ),
   )
@@ -301,8 +301,6 @@ In the table above, answers from greedy and top-p models differ for the same que
 On the other hand, the slightly more random top-p model, answers the question a little longer and provides more information (still very much gibberish), but it is a more "useful" answer.
 
 In the table above, The answers to "how are you?" are similar for both greedy and top-p, the answers both trying to define what a "person" is.
-
-
 
 #figure(
   caption: "Model responses, Greedy VS Top-p",
@@ -315,11 +313,11 @@ In the table above, The answers to "how are you?" are similar for both greedy an
       [*Greedy*], [*Top-p*],
       image(
         "02_decoder_chatbot/figs/chatbot_6.png",
-        width: 100%,
+        width: 125%,
       ),
       image(
         "02_decoder_chatbot/figs/chatbot_5.png",
-        width: 100%,
+        width: 125%,
       ),
     ),
   )
@@ -346,11 +344,11 @@ The Top-p model
       [*Temperature = 2*], [*Temperature = 0.1*],
       image(
         "02_decoder_chatbot/figs/chatbot_3.png",
-        width: 100%,
+        width: 125%,
       ),
       image(
         "02_decoder_chatbot/figs/chatbot_4.png",
-        width: 100%,
+        width: 125%,
       )
     ),
   )
@@ -374,15 +372,15 @@ The model with temperature = 0.1 produces more coherent output, but suffers much
             [*Top-p = 0.1*], [*Top-p = 0.5*], [*Top-p = 0.95*],
     image(
       "02_decoder_chatbot/figs/top_p_0_1.png",
-      width: 100%,
+      width: 110%,
     ),
       image(
       "02_decoder_chatbot/figs/top_p_0_5.png",
-      width: 100%,
+      width: 110%,
     ),
       image(
       "02_decoder_chatbot/figs/top_p_0_95.png",
-      width: 100%,
+      width: 110%,
     ),
     ),
   )
