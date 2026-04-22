@@ -44,8 +44,7 @@ class DecoderBlock(nn.Module):
             attn_mask = attn_mask,
             need_weights = False,
             is_causal = True
-        )[0] # todo unsure about this, returns tuple
-        # attn_output.transpose(1, 0), attn_output_weights
+        )[0]
 
         x_l1 += x
         # ---- l2
@@ -53,7 +52,6 @@ class DecoderBlock(nn.Module):
         return x_l2
 
 
-# TODO:  but make sure to move the positional encoding values to the 8 same device as the input sequence in the forward method.
 class PositionalEncoding(nn.Module):
     """
     Positional encoding module: adds positional information to the input embeddings.
