@@ -39,7 +39,7 @@ Layer 1 includes normalization, followed by multi-head attention, and then dropo
 
 The magic in this layer is what happens in the `Multi-head attention`.
 This part linearly projects queries, keys and values some arbitrary `n` times. Attention is performed on each of these projections, which are then added together, and projected a final time.
-If one were to use only one head for attention, it would be harder for the model to remember multiple parts of the input text simulatenously.
+If one were to use only one head for attention, it would be harder for the model to remember multiple parts of the input text simultaneously.
 The idea is that each of the heads can remember different representations of the input information.
 
 The attention mechanism works by mapping a query and key-value pairs to some output. Each value is assigned a weight, computed by a function between the query and the key. For scaled dot-product attention, the dot product of the query with all the keys is taken, scaled and ran through a softmax function. The softmax function provides the weights for each value.
@@ -51,7 +51,7 @@ Layer 2 includes normalization, an MLP block, and dropout.
 `Layer Norm` -> `MLP` -> `Dropout`
 
 The MLP block linearly projects the data up 4 times its original dimensions, before applying the `GELU` activation function, adding non-linearity. `GELU` is chosen because it can handle both positive and slightly negative values. `GELU` may work well in this case, because a typical network with `RELU` can suffer #link("https://chadrick-kwag.net/posts/relu-gelu-swish-mish-activation-function-comparison/")[if many neurons in a network become zero].
-The output is scaled back down again, before being output.
+The output is scaled back down again, before being output. Between the `GELU` and downsizing linear layer, as well as after the downsizing layer, dropout is applied.
 
 Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
 
@@ -150,7 +150,7 @@ The review of "The Matrix" is extremely positive, and the model gave it a score 
 
 The model nails "Police Academy 4", understanding that the review claims it is a bad movie. The way the review is written is very "straightforward", not using many metaphors, being direct in its criticism, making it an easy guess for the model.
 
-The review for "Twilight 1" is very negative, but instead of being direct in its cristicsm it says things like "You have no talent" and "Please put the camera down". This less direct review may make the model less sure about the prediction, causing it to predict 0.47. Correctly guessing this as a negative review, but just by a little bit.
+The review for "Twilight 1" is very negative, but instead of being direct in its criticism it says things like "You have no talent" and "Please put the camera down". This less direct review may make the model less sure about the prediction, causing it to predict 0.47. Correctly guessing this as a negative review, but just by a little bit.
 
 One of the most interesting reviews is the review for "RuPaul's Drag Race". The model guesses this review as very negative, even though the review is very positive. Perhaps some of the words like "Groundbreaking" and "Eye candy" are a bit too abstract to understand as having positive meaning. Perhaps the training data has few examples of words like this, causing the model to shoot towards a negative prediction.
 
@@ -182,7 +182,7 @@ One of the most interesting reviews is the review for "RuPaul's Drag Race". The 
 )
 
 It was Interesting to see how the model would perform on negations of words, like "not good". Interesting, the model considers "not good" to be positive! But when we add more "not", the model eventually leans towards the review being negative.
-This is a great example of how transformers do not actually care about the "directon" of text, and really look at the text as a whole. Perhaps the model has learned "good" is positive, but "not" is negative, and that is why adding more "not"'s makes the model lean more negativley.
+This is a great example of how transformers do not actually care about the "direction" of text, and really look at the text as a whole. Perhaps the model has learned "good" is positive, but "not" is negative, and that is why adding more "not"'s makes the model lean more negatively.
 
 
 #figure(
@@ -209,31 +209,31 @@ This is a great example of how transformers do not actually care about the "dire
   )
 )
 
-Much like earlier, the model is fooled by negations. In this case "not bad" is scored very negativley, but adding more "not" to the review causes the model to be slightly less negative. Somewhat opposite of what we saw earlier. Perhaps the model has different associations when "not" is used with "good" and "bad".
+Much like earlier, the model is fooled by negations. In this case "not bad" is scored very negatively, but adding more "not" to the review causes the model to be slightly less negative. Somewhat opposite of what we saw earlier. Perhaps the model has different associations when "not" is used with "good" and "bad".
 
 The two examples above show that the model struggles heavily with negations.
 
 
 == Part 2: Decoder-only Model for Text Generation
 
-In this task we are asked to train an decoder only model, to produce text when given some input text. This is a "many" to "many" machine learning situation.
+In this task we are asked to train a decoder only model, to produce text when given some input text. This is a "many" to "many" machine learning situation.
 
 === Transformer model (decoder block)
 
-// WRONG BELOW:
 
-The encoder block consists of two main layers.
+The decoder block consists of two main layers, very similarly to the encoder block.
 
 Layer 1 includes normalization, followed by multi-head attention, and then dropout.
 
 `Layer Norm` -> `Multi-Head attention` -> `Dropout`
 
+The decoder uses `torch.nn.Multiheadattention`, as the exercise says, instead of the custom implementation.
+
 The magic in this layer is what happens in the `Multi-head attention`.
 This part linearly projects queries, keys and values some arbitrary `n` times. Attention is performed on each of these projections, which are then added together, and projected a final time.
-If one were to use only one head for attention, it would be harder for the model to remember multiple parts of the input text simulatenously.
-The idea is that each of the heads can remember information from different represenations.
-
-The attention mechanism works by mapping a query and key-value pairs to some output. Each value is assigned a weight, computed by a function between the query and the key. For scaled dot-product attention, the dot product of the query with all the keys is taken, scaled and ran through a softmax function. The softmax function provides the weights for each value.
+If one were to use only one head for attention, it would be harder for the model to remember multiple parts of the input text simultaneously.
+The idea is that each of the heads can remember information from different representations.
+The attention mechanism has been explained in more detail in the "encoder block" description above.
 
 Between layer 1 and 2, a skip connection is used, adding the output from layer 1, and the initial input together, before feeding this new output into layer 2.
 
@@ -241,18 +241,35 @@ Layer 2 includes normalization, an MLP block, and dropout.
 
 `Layer Norm` -> `MLP` -> `Dropout`
 
-The MLP block linearly projects the data up 4 times its original dimensions, before applying the `GELU` activation function, adding non-linearity. `GELU` is chosen because it can handle both positive and slightly negative values. `GELU` may work well in this case, because a typical network with `RELU` can suffer #link("https://chadrick-kwag.net/posts/relu-gelu-swish-mish-activation-function-comparison/")[if many neurons in a network become zero].
-The output is scaled back down again, before being output.
+The MLP block in the decoder block, linearly projects the input data up 4 times its original dimensions, before applying the `GELU` activation function, adding non-linearity. Similarly to in the encoder block, `GELU` is chosen because it can handle both positive and slightly negative values. The output is then scaled back down again to its original dimensions.
 
-Finally, another skip connection is used, adding the output of layer 2(including its skip connection) to the final output.
+This layer has another skip connection, which adds the output AFTER the layer norm to the total block output.
+
+=== Embeddings
+
+Learned embeddings are used to convert input text to vectors, and these learned embeddings help models understand word similarity. If one were to use another method, say one-hot encoding, one would require very large vectors, as long as the alphabet used. It would also fail to capture the similarity / dissimilarity between words. Size of vector embeddings are matched to the dimension of the model input.
+
+=== Positional encodings
+
+An RNN may understand what it's next output should be, based on the input it receives from itself. On the other side, transformers require extra information to know where in the sequence tokens are coming from.
+Positional encoding is done by augmenting each token with position of the token in the sequence. The positional encodings are generated by a sine or cosine function, depending on if the position is odd or even. These wavelengths generated allow the model to understand where in the text tokens are, relative to each other. #link("https://arxiv.org/abs/1706.03762")[Attention is all you need] theorizes that using sin and cos waves allows the model to generalize, even to lengths it has not seen.
 
 
-=== BPE Tokenizer
+=== Masking
 
-This project uses the byte-pair encoding tokenizer, to encode input text. Initially it buiilds an "alphabet" of all symbols in the total text input.
+Masking tokens is a crucial part to how to train the decoder.
+Causal masking is performed using an upper triangular matrix, so that each token can only attend to previous tokens. By masking tokens after the one in our sequence, we ensure that predictions for a certain index, can only depend on previous tokens. We do this to train a model that can generate text, without knowing how the sentence is going to end. For an example what happens if we forget this mask, see the parrot model below.
+
+The model itself also receives a boolean key padding mask, so that the attention mechanism does not attend to padding tokens during forward passes. These tokens are not interesting, and our model should not try to "remember" or think about them, so we tell the attention mechanism to ignore them.
+
+== BPE Tokenizer
+
+This project uses the byte-pair encoding tokenizer, to encode input text. Initially it builds an "alphabet" of all symbols in the total text input.
 Using this alphabet, we merge together pairs in the alphabet such that it matches those that were often present in the total text input.
-Now we add the merged pair back into the alphabet, and keep going. After a while, often used peices of text will have merged together, while rarer tokens will be smaller.
+Now we add the merged pair back into the alphabet, and keep going. After a while, often used pieces of text will have merged together, while rarer tokens will be smaller.
 We keep merging until we reach a preset vocabulary size, and those are our tokens.
+
+The encoder model in part 1, is a word-level tokenizer, meaning that it only splits on whitespace. The result is that it gets very lost on new words. The BPE tokenizer instead can try to understand unknown words by splitting them up into smaller units.
 
 === Results
 
@@ -265,11 +282,11 @@ We keep merging until we reach a preset vocabulary size, and those are our token
 )
 
 As the graph above shows, the model learns smoothly on training data.
-Perhaps given more time it would be benefical to train the model even longer, as it seems like training loss could go lower.
+Perhaps given more time it would be beneficial to train the model even longer, as it seems like training loss could go lower.
 However, we do not have a validation dataset to compare, so overfitting would be hard to detect.
 
 A conversation with the bot is somewhat funny, yet interesting.
-It seems to generally understand the "feeling" or "vibe" of the conversation, but fails to come up with any actual reasonable, or even syntaxically correct answer.
+It seems to generally understand the "feeling" or "vibe" of the conversation, but fails to come up with any actual reasonable, or even syntactically correct answer.
 Below are some interesting conversations.
 
 Seems like the model has difficulties with negations, much like the earlier model.
@@ -297,7 +314,7 @@ Seems like the model has difficulties with negations, much like the earlier mode
   )
 )
 
-In the table above, answers from greedy and top-p models differ for the same question. For the question "who is the president of the usa", the greedy model seems to be stuck in a loop, repeating "is the oldest person to assume to presidency of the united states" over and over. This is perhaps a good example of how a greedy model picks only the most likeley word, but that sometimes fails to produce novel responses.
+In the table above, answers from greedy and top-p models differ for the same question. For the question "who is the president of the usa", the greedy model seems to be stuck in a loop, repeating "is the oldest person to assume to presidency of the united states" over and over. This is perhaps a good example of how a greedy model picks only the most likely word, but that sometimes fails to produce novel responses.
 On the other hand, the slightly more random top-p model, answers the question a little longer and provides more information (still very much gibberish), but it is a more "useful" answer.
 
 In the table above, The answers to "how are you?" are similar for both greedy and top-p, the answers both trying to define what a "person" is.
@@ -325,9 +342,9 @@ In the table above, The answers to "how are you?" are similar for both greedy an
 
 For this second experiment (seen in the above table), it was attempted to use the chatbot as a sort of "logic machine", to see its output.
 
-Much like the earlier example, the greedy model gets stuck repeating the same words over and over again, a good example of how "short sighted" it is in its responses. However, it actually vaugely answers using boolean logic. It answers "False" for "True and False" (correct) and "False" for "True or False" (wrong).
+Much like the earlier example, the greedy model gets stuck repeating the same words over and over again, a good example of how "short sighted" it is in its responses. However, it actually vaguely answers using boolean logic. It answers "False" for "True and False" (correct) and "False" for "True or False" (wrong).
 
-The top-p model on the same task does not manage to answer using boolean logic, instead it talks about the terms used, or starts talking about objecrs and null types. This is a good example of how the random answer is more diverse, but sometimes misses the mark.
+The top-p model on the same task does not manage to answer using boolean logic, instead it talks about the terms used, or starts talking about objects and null types. This is a good example of how the random answer is more diverse, but sometimes misses the mark.
 
 
 The Top-p model
@@ -356,7 +373,7 @@ The Top-p model
 
 In the above models, we compare two top-p models, temperature 2 and temperature 0.1.
 
-The model with temperature = 2 produces competely random garbage that has nothing to do with the question. This is to be expected because a higher temperature makes more tokens more likely. It essentially "flattens" the token distribution, making those that are very likely, less likely, and those who were not so likely, more likely.
+The model with temperature = 2 produces completely random garbage that has nothing to do with the question. This is to be expected because a higher temperature makes more tokens more likely. It essentially "flattens" the token distribution, making those that are very likely, less likely, and those who were not so likely, more likely.
 
 The model with temperature = 0.1 produces more coherent output, but suffers much the same as the greedy models, since it starts repeating itself. This again makes sense since a low temperature causes the most likely tokens to be even more likely, (peaking the token distribution). Therefore it acts much like the greedy model.
 
@@ -392,7 +409,7 @@ When top-p is small (0.1), less tokens are picked, and we see our top-p model ac
 
 == Issues
 
-I ran into an issue when first training the model, so I accidentally trained a parrot. By forgetting to add `.bool()` to the casual mask, the result was that the model was able to see the next token in the sequence! The model then managed to acheive a perfect performance on training data, as it learned to just repeat the last token in the sequence. I had trained a parrot basically.
+I ran into an issue when first training the model, so I accidentally trained a parrot. By forgetting to add `.bool()` to the causal mask, the result was that the model was able to see the next token in the sequence! The model then managed to achieve a perfect performance on training data, as it learned to just repeat the last token in the sequence. I had trained a parrot basically.
 
 `> model.py`
 ```python
@@ -426,7 +443,7 @@ Pretty much just repeating the last token again and again, until it hits the max
 
 === Given more time
 
-Given more time, more extenstive training of both the decoder and encoder model could have been attempted.
+Given more time, more extensive training of both the decoder and encoder model could have been attempted.
 Based on the loss charts above, training for more epochs would most likely improve performance of both models.
 For the both models, trying larger or more varied models (more heads, different dropout rates, etc) could see an improvement in model performance.
 
@@ -436,7 +453,7 @@ Our approach to solving the tasks involved first understanding the course materi
 
 == Conclusion
 
-To conclude, we successfully implemented and tranined an encoder and decoder model. Inference testing showed that the models work, but that their output is questionable at best.
+To conclude, we successfully implemented and trained an encoder and decoder model. Inference testing showed that the models work, but that their output is questionable at best.
 
 == On the use of AI
 
@@ -444,6 +461,6 @@ AI was used in this project, to assist in bug-fixing, and understanding of the l
 AI has been cited in the code where appropriate.
 In the format uib wishes: The service Google Gemini has been used to generate code for debugging. Gemini was also used to inquire into creating appropriate preprocessing steps.
 
-// == Divison of labour
+// == Division of labour
 
 // Henrik Brøgger did the code and report
