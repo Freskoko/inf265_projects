@@ -64,7 +64,7 @@ class PositionalEncoding(nn.Module):
 
         iarange = torch.arange(0, embed_size, 2)
 
-        div_term =  (10000.0 **((iarange) / embed_size)) # is this 2 correct?
+        div_term =  (10000.0 **((iarange) / embed_size))
 
         pe = torch.zeros(max_len, embed_size)
 
